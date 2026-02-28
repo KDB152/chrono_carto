@@ -1,0 +1,22 @@
+*   [33mf5d7fb5[m[33m ([m[1;35mrefs/stash[m[33m)[m On main: sauvegarde modifications email-verification
+[31m|[m[32m\[m  
+[31m|[m * [33m6b8dfa3[m index on main: 5a27a97 KDB12 don't know git
+[31m|[m[31m/[m  
+* [33m5a27a97[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m KDB12 don't know git
+* [33ma1436e8[m first commit
+* [33m2619038[m first commit
+* [33md162c88[m first commit
+* [33m2f927b2[m first commit
+* [33m783092d[m first commit
+* [33mc7b7a7f[m Update backend configuration and compiled files for production deployment
+* [33mdb9eea4[m feat: Amélioration de la gestion des rendez-vous admin - Suppression de la fonctionnalité de suppression - Refus avec raison obligatoire pour approuver et refuser - Amélioration de l'interface utilisateur - Correction du layout responsive du profil parent - Nettoyage des fichiers non nécessaires
+* [33me3099af[m feat: Amélioration de la gestion des rendez-vous backend - Ajout des endpoints PUT et DELETE pour les rendez-vous - Validation obligatoire de la raison pour approuver/refuser - Nettoyage des fichiers de migration et entités obsolètes - Suppression des tables de base de données non utilisées - Amélioration de la sécurité des endpoints admin
+* [33m357da79[m feat: Amélioration de la gestion des rendez-vous backend - Ajout des endpoints PUT et DELETE pour les rendez-vous - Validation obligatoire de la raison pour approuver/refuser - Nettoyage des fichiers de migration et entités obsolètes - Suppression des tables de base de données non utilisées - Amélioration de la sécurité des endpoints admin
+* [33mc4963bb[m Add comprehensive .gitignore and maintain uploads directory structure
+* [33m382c425[m Remove large files and clean up repository
+* [33m84b7678[m first commit
+* [33md19caac[m first commit
+* [33m52b10bd[m first commit
+[32m|[m * [33md4240ac[m Remove large files and clean up repository
+[32m|[m * [33m5f23de8[m first commit
+[32m|[m * [33m70f81e0[m first commit

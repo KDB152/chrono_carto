@@ -1,0 +1,453 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    /* Fix pour iOS Safari */
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    @apply font-sans text-gray-900 bg-gray-50;
+    /* Fix pour le viewport sur mobile */
+    min-height: -webkit-fill-available;
+    /* Fix pour Safari */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Empêcher le zoom sur double tap iOS */
+    touch-action: manipulation;
+  }
+  
+  * {
+    @apply border-gray-200;
+  }
+  
+  /* Fix pour les inputs sur iOS */
+  input, textarea, select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 0;
+  }
+  
+  /* Fix pour les boutons sur iOS */
+  button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  
+  /* Fix pour les images responsive */
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* Fix pour le viewport sur mobile */
+  @supports (-webkit-touch-callout: none) {
+    body {
+      min-height: -webkit-fill-available;
+    }
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium px-6 py-3 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium px-6 py-3 rounded-lg border border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 bg-white;
+  }
+  
+  .card {
+    @apply bg-white rounded-xl shadow-soft border border-gray-100 overflow-hidden;
+  }
+  
+  .card-hover {
+    @apply card transition-all duration-300 hover:shadow-medium hover:-translate-y-1;
+  }
+  
+  .gradient-bg {
+    @apply bg-gradient-to-br from-primary-600 via-primary-700 to-secondary-600;
+  }
+  
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent;
+  }
+  
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-sm border border-white/20;
+  }
+}
+
+@layer utilities {
+  .animation-delay-200 {
+    animation-delay: 200ms;
+  }
+  
+  .animation-delay-400 {
+    animation-delay: 400ms;
+  }
+  
+  .animation-delay-600 {
+    animation-delay: 600ms;
+  }
+  
+  /* Utilities responsive */
+  .container-responsive {
+    @apply w-full mx-auto px-4 sm:px-6 lg:px-8;
+    max-width: 100%;
+  }
+  
+  /* Fix pour le safe area sur iOS */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  /* Fix pour le viewport height sur mobile */
+  .min-h-screen-mobile {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+  
+  /* Fix pour les flexbox sur Safari */
+  .flex-safari {
+    display: -webkit-flex;
+    display: flex;
+  }
+  
+  /* Fix pour les grid sur Safari */
+  .grid-safari {
+    display: -ms-grid;
+    display: grid;
+  }
+}
+
+/* Custom scrollbar - Webkit (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-400 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-500;
+}
+
+/* Custom scrollbar - Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(156 163 175) rgb(243 244 246);
+}
+
+/* Fix pour le scroll sur iOS */
+@supports (-webkit-overflow-scrolling: touch) {
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Loading animations */
+.loading-dots {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.loading-dots div {
+  position: absolute;
+  top: 33px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: currentColor;
+  animation-timing-function: cubic-bezier(0, 1, 1, 0);
+}
+
+.loading-dots div:nth-child(1) {
+  left: 8px;
+  animation: loading-dots1 0.6s infinite;
+}
+
+.loading-dots div:nth-child(2) {
+  left: 8px;
+  animation: loading-dots2 0.6s infinite;
+}
+
+.loading-dots div:nth-child(3) {
+  left: 32px;
+  animation: loading-dots2 0.6s infinite;
+}
+
+.loading-dots div:nth-child(4) {
+  left: 56px;
+  animation: loading-dots3 0.6s infinite;
+}
+
+@keyframes loading-dots1 {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes loading-dots3 {
+  0% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
+@keyframes loading-dots2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  100% {
+    transform: translate(24px, 0);
+  }
+}
+
+/* Variables CSS pour le viewport mobile */
+:root {
+  --vh: 1vh;
+}
+
+/* Fix pour le viewport height sur mobile iOS */
+@media screen and (max-width: 768px) {
+  html {
+    height: -webkit-fill-available;
+  }
+  
+  body {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    min-height: calc(var(--vh, 1vh) * 100);
+  }
+}
+
+/* Styles spécifiques pour iOS */
+@supports (-webkit-touch-callout: none) {
+  body {
+    min-height: -webkit-fill-available;
+  }
+  
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Styles spécifiques pour Safari */
+@supports (-webkit-appearance: none) and (not (appearance: none)) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    -webkit-appearance: none;
+    border-radius: 0.5rem;
+  }
+}
+
+/* Fix pour les flexbox sur Safari ancien */
+@supports (display: -webkit-flex) {
+  .flex {
+    display: -webkit-flex;
+    display: flex;
+  }
+}
+
+/* Fix pour les grid sur Safari ancien */
+@supports (display: -ms-grid) {
+  .grid {
+    display: -ms-grid;
+    display: grid;
+  }
+}
+
+/* Amélioration du touch sur mobile */
+@media (hover: none) and (pointer: coarse) {
+  button,
+  a,
+  [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  input,
+  textarea,
+  select {
+    font-size: 16px; /* Empêche le zoom sur iOS */
+  }
+}
+
+/* Fix pour les transitions sur mobile */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Amélioration de la lisibilité sur mobile */
+@media screen and (max-width: 768px) {
+  body {
+    font-size: 16px; /* Taille minimale recommandée */
+    line-height: 1.6;
+  }
+  
+  h1 {
+    font-size: 1.75rem;
+    line-height: 1.3;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+    line-height: 1.4;
+  }
+}
+
+/* Fix pour les safe areas sur iOS */
+@supports (padding: max(0px)) {
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  
+  .safe-area-left {
+    padding-left: max(1rem, env(safe-area-inset-left));
+  }
+  
+  .safe-area-right {
+    padding-right: max(1rem, env(safe-area-inset-right));
+  }
+}
+
+
+/* Améliorations mobile - Cacher les sidebars et ajuster le layout */
+@media screen and (max-width: 1023px) {
+  /* Forcer le contenu principal à prendre toute la largeur */
+  [class*="ml-80"],
+  [class*="ml-20"] {
+    margin-left: 0 !important;
+  }
+  
+  /* Ajuster les paddings sur mobile */
+  .dashboard-content,
+  [class*="px-6"],
+  [class*="px-8"] {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Améliorer la lisibilité sur mobile */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  /* Cards plus compactes sur mobile */
+  [class*="p-8"],
+  [class*="p-6"] {
+    padding: 1rem !important;
+  }
+  
+  /* Espacement réduit sur mobile */
+  [class*="space-y-8"],
+  [class*="space-y-6"] {
+    gap: 1rem !important;
+  }
+}
+
+/* Réduction de l'affichage à 65% SEULEMENT pour les téléphones */
+@media screen and (max-width: 768px) {
+  html {
+    transform: scale(0.65);
+    transform-origin: top left;
+    width: 153.85%; /* 100 / 0.65 = 153.85% pour compenser la réduction */
+    height: 153.85%;
+  }
+  
+  body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Ajuster les containers pour éviter le débordement */
+  #root, #__next {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+/* Réduction légère de l'affichage à 95% pour les PC */
+@media screen and (min-width: 1024px) {
+  html {
+    transform: scale(0.95);
+    transform-origin: top left;
+    width: 105.26%; /* 100 / 0.95 = 105.26% pour compenser la réduction */
+    height: 105.26%;
+  }
+  
+  body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Ajuster les containers pour éviter le débordement */
+  #root, #__next {
+    width: 100%;
+    height: 100%;
+  }
+}
