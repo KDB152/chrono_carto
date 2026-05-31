@@ -430,13 +430,13 @@
   }
 }
 
-/* Réduction légère de l'affichage à 95% pour les PC */
+/* Réduction de l'affichage à 80% pour les PC */
 @media screen and (min-width: 1024px) {
   html {
-    transform: scale(0.95);
+    transform: scale(0.8);
     transform-origin: top left;
-    width: 105.26%; /* 100 / 0.95 = 105.26% pour compenser la réduction */
-    height: 105.26%;
+    width: 125%; /* 100 / 0.8 = 125% pour compenser la réduction */
+    height: 125%;
   }
   
   body {
