@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL!;
+import urlapi from '@/config/url'
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,9 +17,9 @@ export async function GET(request: NextRequest) {
 
     // Appeler le backend pour recuperer les resultats des quiz
     // Appeler le backend directement (contourner nginx)
-    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL!;
+    const backendUrl = urlapi.backendurl || urlapi.url;
     
-    const response = await fetch(`${backendUrl}/api/quizzes/parent-results?studentId=${studentId}`, {
+    const response = await fetch(`${backendUrl}${urlapi.backendurlsapi.quiz}?studentId=${studentId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

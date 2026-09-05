@@ -19,7 +19,7 @@ import {
   Shield,
   Plus
 } from 'lucide-react';
-
+import urlapi from '@/config/url';
 interface StudentProfile {
   personal: {
     firstName: string;
@@ -229,7 +229,7 @@ const ProfileTab: React.FC = () => {
         setUserId(user.id);
         
         // Récupérer les données de l'étudiant depuis l'API
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://www.chronocarto.tn/api';
+        
         const token = localStorage.getItem('token');
         
         let studentData = null;
@@ -237,7 +237,7 @@ const ProfileTab: React.FC = () => {
         
         try {
           // Récupérer les données de l'étudiant par user_id
-          const studentResponse = await fetch(`${API_BASE}/students/by-user/${user.id}`, {
+          const studentResponse = await fetch(`${urlapi.backendurlsapi.studentsbyuser}/${user.id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (studentResponse.ok) {
@@ -246,7 +246,7 @@ const ProfileTab: React.FC = () => {
             
             // Récupérer les données du parent via l'ID de l'étudiant
             if (studentData?.id) {
-              const parentResponse = await fetch(`${API_BASE}/students/${studentData.id}/parent`, {
+              const parentResponse = await fetch(`${urlapi.backendurlsapi.childs}/${studentData.id}${urlapi.backendurlsapi.parent}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
               });
               if (parentResponse.ok) {
@@ -369,9 +369,7 @@ const ProfileTab: React.FC = () => {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       
       if (token && userId) {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://www.chronocarto.tn/api';
-        
-        const response = await fetch(`${API_BASE}/pdp/me`, {
+        const response = await fetch(`${urlapi.backendurlsapi.photoprofile}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },

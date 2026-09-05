@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Lock, ArrowLeft, CheckCircle, Globe, MapPin, Eye, EyeOff, Shield, Zap, Users, ArrowRight } from 'lucide-react';
-
+import urlapi from '@/config/url'
 export default function ResetPasswordPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -119,10 +119,9 @@ export default function ResetPasswordPage() {
         newPassword: formData.password 
       };
       
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      console.log('🚀 Envoi de la requête...');
+    
 
-      const response = await fetch(`${API_BASE}/auth/reset-password`, {
+      const response = await fetch(`${urlapi.urlsapi.resetPassword}`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

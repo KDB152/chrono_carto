@@ -62,7 +62,7 @@ import {
   TreePine,
   BookOpen
 } from 'lucide-react';
-
+import urlapi from '@/config/url';
 interface Child {
   id: string;
   firstName: string;
@@ -138,14 +138,14 @@ const CalendarTab: React.FC<CalendarTabProps> = ({ selectedChild, parent, onChil
       setIsLoading(true);
       
       // Charger les séances d'étude
-      const studyResponse = await fetch('/api/study-sessions');
+      const studyResponse = await fetch(`${urlapi.backendurlsapi.studysessionsapi}`);
       const studyData = await studyResponse.json();
       
       // Charger les rendez-vous pour ce parent
       console.log('🔍 Chargement des rendez-vous pour le parent:', parent?.id);
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       
-      const appointmentsResponse = await fetch(`/api/rendez-vous?parentId=${parent?.id || ''}`, {
+      const appointmentsResponse = await fetch(`${urlapi.backendurlsapi.apirendivous}?parentId=${parent?.id || ''}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

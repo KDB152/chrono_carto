@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Mail, CheckCircle, AlertCircle, Loader2, ArrowLeft } from 'lucide-react';
-
+import urlapi from '@/config/url'
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -43,9 +43,9 @@ export default function VerifyEmailPage() {
     setMessage('');
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${API_BASE}/auth/resend-verification`, {
-        method: 'POST',
+    
+        const response = await fetch(`${urlapi.urlsapi.resendverification}`, {
+          method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       });
@@ -79,8 +79,8 @@ export default function VerifyEmailPage() {
     setMessage('');
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${API_BASE}/auth/check-verification`, {
+ 
+      const response = await fetch(`${urlapi.urlsapi.checkverification}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

@@ -1,5 +1,5 @@
 'use client';
-
+import urlapi from '@/config/url';
 import React, { useState, useEffect } from 'react';
 import { 
   BookOpen, 
@@ -13,6 +13,7 @@ import {
   Calendar,
   User
 } from 'lucide-react';
+
 
 interface QuizResult {
   id: number;
@@ -81,7 +82,7 @@ const QuizResultsTab: React.FC = () => {
       }
 
       // Récupérer les tentatives de l'étudiant
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/quizzes/attempts?student_id=${studentId}`);
+      const response = await fetch(`${urlapi.backendurlsapi.attempts}?student_id=${studentId}`);
       
       if (!response.ok) {
         throw new Error(`Failed to fetch quiz attempts: ${response.status}`);
@@ -95,7 +96,7 @@ const QuizResultsTab: React.FC = () => {
         attempts.map(async (attempt: any) => {
           try {
             // Récupérer les détails du quiz
-            const quizResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/quizzes/${attempt.quiz_id}`);
+            const quizResponse = await fetch(`${urlapi.backendurlsapi.quizzes}/${attempt.quiz_id}`);
             if (!quizResponse.ok) return null;
             
             const quiz = await quizResponse.json();
@@ -104,14 +105,14 @@ const QuizResultsTab: React.FC = () => {
             if (!quiz.show_results) return null;
 
             // Récupérer les questions du quiz
-            const questionsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/quizzes/${attempt.quiz_id}/questions`);
+            const questionsResponse = await fetch(`${urlapi.backendurlsapi.quizzes}/${attempt.quiz_id}${urlapi.backendurlsapi.questions}`);
             let questions = [];
             if (questionsResponse.ok) {
               questions = await questionsResponse.json();
             }
 
             // Récupérer les réponses de l'étudiant
-            const answersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/quizzes/attempts/${attempt.id}/answers`);
+            const answersResponse = await fetch(`${urlapi.backendurlsapi.attempts}/${attempt.id}${urlapi.backendurlsapi.answers}`);
             let studentAnswers = {};
             if (answersResponse.ok) {
               studentAnswers = await answersResponse.json();

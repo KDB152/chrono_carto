@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import urlapi from '@/config/url'
 
-const BACKEND_URL = process.env.BACKEND_URL!;
 
 export async function GET(
   request: NextRequest,
@@ -14,7 +14,7 @@ export async function GET(
     const year = searchParams.get('year');
     
     // R�cup�rer les s�ances d'�tude pour l'enfant
-    let studySessionsUrl = `${BACKEND_URL}/study-sessions`;
+    let studySessionsUrl = `${urlapi.backendurlsapi.session}`;
     const studySessionsParams = new URLSearchParams();
     
     if (date) {
@@ -33,7 +33,7 @@ export async function GET(
     }
     
     // R�cup�rer les informations de l'enfant pour filtrer par classe
-    const childResponse = await fetch(`${BACKEND_URL}/students/${childId}`);
+    const childResponse = await fetch(`${urlapi.backendurlsapi.childs}/${childId}`);
     const childData = await childResponse.json();
     
     if (!childResponse.ok) {

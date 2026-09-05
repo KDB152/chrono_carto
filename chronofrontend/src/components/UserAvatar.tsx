@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { User } from 'lucide-react';
-
+import urlapi from '../config/url';
 interface UserAvatarProps {
   userId: number;
   firstName?: string;
@@ -51,9 +51,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       
       if (token) {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        
-        const response = await fetch(`${API_BASE}/pdp/user/${userId}`, {
+     
+        const response = await fetch(`${urlapi.urlsapi.pdfuser}/${userId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },

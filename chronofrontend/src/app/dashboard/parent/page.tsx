@@ -31,7 +31,7 @@ import CalendarTab from './CalendarTab';
 import MeetingsTab from './MeetingsTab';
 import PaymentsTab from './PaymentsTab';
 import ParentProfileTab from './ParentProfileTab';
-
+import urlapi from '@/config/url';
 interface Child {
   id: string;
   firstName: string;
@@ -156,11 +156,11 @@ const ParentDashboard: React.FC = () => {
     try {
       
       // Récupérer l'ID du parent depuis la base de données
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       
       // D'abord, récupérer l'ID du parent
-      const parentResponse = await fetch(`${API_BASE}/parents/by-user/${userId}`, {
+      const parentResponse = await fetch(`${urlapi.backendurlsapi.parentbyuser}/${userId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -172,7 +172,7 @@ const ParentDashboard: React.FC = () => {
       const parentData = await parentResponse.json();
       
       // Maintenant récupérer les enfants via la nouvelle API
-      const childrenResponse = await fetch(`${API_BASE}/parents/children?parentId=${parentData.id}`, {
+      const childrenResponse = await fetch(`${urlapi.backendurlsapi.parentbychildren}?parentId=${parentData.id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       

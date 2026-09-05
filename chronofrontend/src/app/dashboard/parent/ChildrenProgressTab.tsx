@@ -60,7 +60,7 @@ import {
   Frown,
   Meh
 } from 'lucide-react';
-
+import urlapi from '@/config/url';
 interface Child {
   id: string;
   firstName: string;
@@ -159,11 +159,11 @@ const ChildrenProgressTab: React.FC<ChildrenProgressTabProps> = ({
         console.log('🔍 Chargement des enfants pour le parent ID:', user.id);
         
         // Récupérer l'ID du parent depuis la base de données
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      
         const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
         
         // D'abord, récupérer l'ID du parent
-        const parentResponse = await fetch(`${API_BASE}/parents/by-user/${user.id}`, {
+        const parentResponse = await fetch(`${urlapi.backendurlsapi.parentbyuser}/${user.id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -177,7 +177,7 @@ const ChildrenProgressTab: React.FC<ChildrenProgressTabProps> = ({
         console.log('✅ Données parent récupérées:', parentData);
         
         // Maintenant récupérer les enfants via la nouvelle API
-        const childrenResponse = await fetch(`${API_BASE}/parents/children?parentId=${parentData.id}`, {
+        const childrenResponse = await fetch(`${urlapi.backendurlsapi.parentbychildren}?parentId=${parentData.id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         
@@ -254,7 +254,7 @@ const ChildrenProgressTab: React.FC<ChildrenProgressTabProps> = ({
         setLoading(true);
         
         // Utiliser la même API que l'onglet Progrès de l'étudiant
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://www.chronocarto.tn/api'}/quizzes/attempts?student_id=${currentChild.id}`);
+        const response = await fetch(`${urlapi.backendurlsapi.attempts}?student_id=${currentChild.id}`);
         
         if (!response.ok) {
           throw new Error(`Échec de récupération des tentatives: ${response.status}`);
@@ -266,7 +266,7 @@ const ChildrenProgressTab: React.FC<ChildrenProgressTabProps> = ({
         // Récupérer les détails des quiz pour chaque tentative
         const resultsWithDetails = await Promise.allSettled(
           attempts.map(async (attempt: any) => {
-            const quizResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://www.chronocarto.tn/api'}/quizzes/${attempt.quiz_id}`);
+            const quizResponse = await fetch(`${urlapi.backendurlsapi.quizzes}/${attempt.quiz_id}`);
             if (!quizResponse.ok) return null;
             
             const quiz = await quizResponse.json();

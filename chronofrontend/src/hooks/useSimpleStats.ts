@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-
+import urlapi from '../config/url';
 interface SimpleStats {
   completedQuizzes: number;
   averageScore: number;
@@ -22,8 +22,7 @@ export const useSimpleStats = () => {
     setError(null);
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      
+         
       // Récupérer l'utilisateur connecté
       const userDetails = localStorage.getItem('userDetails');
       const currentUser = userDetails ? JSON.parse(userDetails) : null;
@@ -38,7 +37,7 @@ export const useSimpleStats = () => {
       // 1. Récupérer tous les quiz disponibles (sans authentification pour test)
       let totalQuizzes = 0;
       try {
-        const quizzesResponse = await fetch(`${API_BASE}/quizzes`);
+        const quizzesResponse = await fetch(`${urlapi.backendurlsapi.quizzes}`);
         if (quizzesResponse.ok) {
           const quizzesData = await quizzesResponse.json();
           const quizzes = quizzesData.items || [];
@@ -65,7 +64,7 @@ export const useSimpleStats = () => {
           if (studentId) {
             console.log('📄 Chargement des tentatives pour l\'étudiant:', studentId);
             
-            const response = await fetch(`${API_BASE}/quizzes/attempts?student_id=${studentId}`);
+            const response = await fetch(`${urlapi.backendurlsapi.attempts}?student_id=${studentId}`);
             
             if (response.ok) {
               const attempts = await response.json();
@@ -77,7 +76,7 @@ export const useSimpleStats = () => {
                 // Récupérer les détails des quiz pour chaque tentative
                 const resultsWithDetails = await Promise.allSettled(
                   attempts.map(async (attempt: any) => {
-                    const quizResponse = await fetch(`${API_BASE}/quizzes/${attempt.quiz_id}`);
+                    const quizResponse = await fetch(`${urlapi.backendurlsapi.quizzes}/${attempt.quiz_id}`);
                     if (!quizResponse.ok) return null;
                     
                     const quiz = await quizResponse.json();
@@ -114,7 +113,7 @@ export const useSimpleStats = () => {
       try {
         const token = localStorage.getItem('token');
         if (token) {
-          const conversationsResponse = await fetch(`${API_BASE}/messaging/conversations?userId=${currentUserId}&userRole=student`, {
+          const conversationsResponse = await fetch(`${urlapi.urlsapi.conversation}?userId=${currentUserId}&userRole=student`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'

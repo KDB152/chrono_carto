@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import './VerifyEmail.css';
-
+import urlapi from '../config/url';
 interface VerifyEmailProps {
   mode?: 'code' | 'link';
 }
@@ -38,7 +38,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ mode = 'code' }) => {
   }, [searchParams, mode]);
 
   // Configuration de l'API - IMPORTANT: Adaptez cette URL à votre backend
-  const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://192.168.1.15:3001';
+ 
 
   const sendVerificationCode = async () => {
     if (!email) {
@@ -53,7 +53,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ mode = 'code' }) => {
     try {
       console.log('Envoi du code de vérification à:', email);
       
-      const response = await fetch(`${API_BASE_URL}/auth/send-verification-code`, {
+      const response = await fetch(`${urlapi.urlsapi.verifcode}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ mode = 'code' }) => {
     } catch (err: any) {
       console.error('Erreur de connexion:', err);
       setError(`Erreur de connexion au serveur: ${err.message}`);
-      setDebugInfo({ error: err.message, url: `${API_BASE_URL}/auth/send-verification-code` });
+      setDebugInfo({ error: err.message, url: `${urlapi.urlsapi.verifcode}` });
     } finally {
       setLoading(false);
     }
@@ -93,7 +93,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ mode = 'code' }) => {
     try {
       console.log('Envoi du lien de vérification à:', email);
       
-      const response = await fetch(`${API_BASE_URL}/auth/send-verification-link`, {
+      const response = await fetch(`${urlapi.urlsapi.veriflink}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -114,7 +114,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ mode = 'code' }) => {
     } catch (err: any) {
       console.error('Erreur de connexion:', err);
       setError(`Erreur de connexion au serveur: ${err.message}`);
-      setDebugInfo({ error: err.message, url: `${API_BASE_URL}/auth/send-verification-link` });
+      setDebugInfo({ error: err.message, url: `${urlapi.urlsapi.veriflink}` });
     } finally {
       setLoading(false);
     }
@@ -133,7 +133,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ mode = 'code' }) => {
     try {
       console.log('Vérification du code:', code, 'pour email:', email);
       
-      const response = await fetch(`${API_BASE_URL}/auth/verify-code`, {
+      const response = await fetch(`${urlapi.urlsapi.authverify}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -157,7 +157,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ mode = 'code' }) => {
     } catch (err: any) {
       console.error('Erreur de connexion:', err);
       setError(`Erreur de connexion au serveur: ${err.message}`);
-      setDebugInfo({ error: err.message, url: `${API_BASE_URL}/auth/verify-code` });
+      setDebugInfo({ error: err.message, url: `${urlapi.urlsapi.authverify}` });
     } finally {
       setLoading(false);
     }
@@ -171,7 +171,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ mode = 'code' }) => {
     try {
       console.log('Vérification du token:', token);
       
-      const response = await fetch(`${API_BASE_URL}/auth/verify-token`, {
+      const response = await fetch(`${urlapi.urlsapi.authtoken}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -197,7 +197,7 @@ const VerifyEmail: React.FC<VerifyEmailProps> = ({ mode = 'code' }) => {
       console.error('Erreur de connexion:', err);
       setError(`Erreur de connexion au serveur: ${err.message}`);
       setStep('error');
-      setDebugInfo({ error: err.message, url: `${API_BASE_URL}/auth/verify-token`, token });
+      setDebugInfo({ error: err.message, url: `${urlapi.urlsapi.authtoken}`, token });
     } finally {
       setLoading(false);
     }

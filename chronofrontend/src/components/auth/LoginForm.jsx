@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
-
+import urlapi from '../../config/url';
 export function LoginForm({ onLogin }) {
   const [formData, setFormData] = useState({
     email: '',
@@ -21,7 +21,7 @@ export function LoginForm({ onLogin }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/auth/login', {
+      const response = await fetch(`${urlapi.urlsapi.login}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

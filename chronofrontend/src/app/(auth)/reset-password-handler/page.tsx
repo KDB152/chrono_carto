@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 
+
 // Page intermédiaire qui capture le token et redirige vers la page principale
 export default function ResetPasswordHandler() {
   const router = useRouter();

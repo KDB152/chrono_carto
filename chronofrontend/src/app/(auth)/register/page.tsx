@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ToastProvider } from '@/components/ui/toast';
 import { Mail, Lock, User, Eye, EyeOff, UserPlus, Globe, MapPin, BookOpen, CheckCircle, AlertCircle, GraduationCap, Phone, Calendar, Baby, ArrowRight, Shield, Zap, Users, Star, Award } from 'lucide-react';
-
+import urlapi from '@/config/url'
 // Export viewport configuration
 export const viewport = {
   themeColor: '#F59E0B',
@@ -247,7 +247,7 @@ const RegisterPage: React.FC = () => {
         if (formData.childPhone?.trim()) requestData.childPhone = formData.childPhone;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/auth/register`, {
+      const response = await fetch(`${urlapi.urlsapi.register}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData),

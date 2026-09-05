@@ -84,7 +84,7 @@ import {
   MousePointerClick,
   MousePointerSquareDashed
 } from 'lucide-react';
-
+import urlapi from '@/config/url';
 interface RendezVous {
   id: string;
   parentId: string;
@@ -127,7 +127,7 @@ const RendezVousManagementTab: React.FC<RendezVousManagementTabProps> = ({ onRef
       // Récupérer le token d'authentification
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       
-      const response = await fetch('/api/admin/rendez-vous', {
+      const response = await fetch(`${urlapi.backendurlsapi.apiadminrendivous}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

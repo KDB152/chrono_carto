@@ -169,6 +169,7 @@ import {
   Zombie
 } from 'lucide-react';
 
+import urlapi from '@/config/url';
 interface Resource {
   id: string;
   title: string;
@@ -235,7 +236,6 @@ const ResourcesTab: React.FC = () => {
   // Fonction de téléchargement
   const handleDownload = async (resource: Resource) => {
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       
       if (!token) {
@@ -262,7 +262,7 @@ const ResourcesTab: React.FC = () => {
       `;
       document.body.appendChild(loadingElement);
       
-      const response = await fetch(`${API_BASE}/files/${resource.id}/download`, {
+      const response = await fetch(`${urlapi.backendurlsapi.files}/${resource.id}${urlapi.backendurlsapi.download}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -345,7 +345,7 @@ const ResourcesTab: React.FC = () => {
   // Fonction d'ouverture de fichier
   const handleOpenFile = async (resource: Resource) => {
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       
       if (!token) {
@@ -355,7 +355,7 @@ const ResourcesTab: React.FC = () => {
 
       console.log('👁️ Ouverture du fichier:', resource.title);
       
-      const response = await fetch(`${API_BASE}/files/${resource.id}/download`, {
+      const response = await fetch(`${urlapi.backendurlsapi.files}/${resource.id}${urlapi.backendurlsapi.download}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -389,7 +389,7 @@ const ResourcesTab: React.FC = () => {
   };
 
   useEffect(() => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+  
     const load = async () => {
       try {
         // Récupérer les détails de l'utilisateur
@@ -406,7 +406,7 @@ const ResourcesTab: React.FC = () => {
         let userClass = 'Terminale groupe 1'; // Valeur par défaut
         
         try {
-          const studentResponse = await fetch(`${API_BASE}/students/by-user/${user.id}`, {
+          const studentResponse = await fetch(`${urlapi.backendurlsapi.studentsbyuser}/${user.id}`, {
             headers: {
               'Authorization': `Bearer ${localStorage.getItem('token') || localStorage.getItem('accessToken')}`
             }

@@ -42,7 +42,7 @@ import {
   Plus,
   Loader2
 } from 'lucide-react';
-
+import urlapi from '@/config/url';
 interface Student {
   id: number;
   firstName: string;
@@ -272,7 +272,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
   // Fonction pour récupérer les données du parent d'un étudiant
   const fetchParentDataForStudent = async (studentId: number) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/students/${studentId}/parent`, {
+      const response = await fetch(`${urlapi.backendurlsapi.studentmangement}/${studentId}${urlapi.backendurlsapi.parent}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
         },
@@ -289,7 +289,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
   // Fonction pour récupérer les données de l'enfant d'un parent
   const fetchChildDataForParent = async (parentId: number) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/parents/${parentId}/child`, {
+      const response = await fetch(`${urlapi.backendurlsapi.parents}/${parentId}${urlapi.backendurlsapi.childddd}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
         },
@@ -338,7 +338,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
       });
 
       // Appeler l'API backend
-      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+    
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       
       // Utiliser directement l'ID de l'utilisateur (plus fiable que la recherche par email)
@@ -350,10 +350,10 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
       
       console.log('🔍 Updating user:', userId, 'with data:', userData);
       console.log('🔍 Using token:', token ? 'Token present' : 'No token');
-      console.log('🔍 Backend URL:', backendUrl);
-      console.log('🔍 Full URL:', `${backendUrl}/users/${userId}`);
+      console.log('🔍 Backend URL:', urlapi.apibase);
+      console.log('🔍 Full URL:', `${urlapi.apibase}/users/${userId}`);
       
-      const response = await fetch(`${backendUrl}/users/${userId}`, {
+      const response = await fetch(`${urlapi.backendurlsapi.user}/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -530,8 +530,8 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
         console.log('🔍 Creating student with data:', registrationData);
         console.log('🔍 Phone field value:', (newUser as any).phone_number);
         
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${API_BASE}/auth/register`, {
+       
+        const response = await fetch(`${urlapi.urlsapi.register}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(registrationData)
@@ -562,8 +562,8 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
           childPassword: mainPassword // Même mot de passe que le parent
         };
         
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const response = await fetch(`${API_BASE}/auth/register`, {
+  
+        const response = await fetch(`${urlapi.urlsapi.register}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(registrationData)

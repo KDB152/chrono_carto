@@ -25,7 +25,7 @@ import {
   Users,
   AlertCircle
 } from 'lucide-react';
-
+import urlapi from '@/config/url';
 interface Dossier {
   id: number;
   name: string;
@@ -73,7 +73,7 @@ const StudentFileNavigation: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 
   // Charger les dossiers accessibles à l'étudiant
   const loadDossiers = async () => {
@@ -86,7 +86,7 @@ const StudentFileNavigation: React.FC = () => {
         throw new Error('Token d\'authentification manquant');
       }
 
-      const response = await fetch(`${API_BASE}/new-structure/student/dossiers`, {
+      const response = await fetch(`${urlapi.backendurlsapi.studentdossier}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -119,7 +119,7 @@ const StudentFileNavigation: React.FC = () => {
         throw new Error('Token d\'authentification manquant');
       }
 
-      const response = await fetch(`${API_BASE}/new-structure/student/dossiers/${dossierId}/sous-dossiers`, {
+      const response = await fetch(`${urlapi.backendurlsapi.studentdossier}/${dossierId}${urlapi.backendurlsapi.sousdossier}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -150,7 +150,7 @@ const StudentFileNavigation: React.FC = () => {
         throw new Error('Token d\'authentification manquant');
       }
 
-      const response = await fetch(`${API_BASE}/new-structure/student/sous-dossiers/${sousDossierId}/fichiers`, {
+      const response = await fetch(`${urlapi.backendurlsapi.studentsousdossier}/${sousDossierId}${urlapi.backendurlsapi.fichiers}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -208,7 +208,7 @@ const StudentFileNavigation: React.FC = () => {
         throw new Error('Token d\'authentification manquant');
       }
 
-      const response = await fetch(`${API_BASE}/new-structure/fichiers/${fichier.id}/download`, {
+      const response = await fetch(`${urlapi.backendurlsapi.newstructurefichiers}/${fichier.id}${urlapi.backendurlsapi.download}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

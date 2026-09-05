@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, Shield } from 'lucide-react';
 import SecuritySettings from '@/components/SecuritySettings';
 import ProfilePictureUpload from '@/components/ProfilePictureUpload';
-
+import urlapi from '@/config/url';
 interface AdminProfile {
   personal: {
     firstName: string;
@@ -57,9 +57,8 @@ const AdminProfileTab = () => {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       
       if (token) {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        
-        const response = await fetch(`${API_BASE}/auth/me`, {
+  
+        const response = await fetch(`${urlapi.urlsapi.authme}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -97,9 +96,8 @@ const AdminProfileTab = () => {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       
       if (token) {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
         
-        const response = await fetch(`${API_BASE}/pdp/me`, {
+        const response = await fetch(`${urlapi.backendurlsapi.photoprofile}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -121,7 +119,7 @@ const AdminProfileTab = () => {
     try {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       if (token) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/auth/update-profile`, {
+          const response = await fetch(`${urlapi.backendurlsapi.updatephoto}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -162,7 +160,7 @@ const AdminProfileTab = () => {
     try {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       if (token) {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/auth/change-password`, {
+        const response = await fetch(`${urlapi.backendurlsapi.authchangepassword}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Clock, Mail, CheckCircle, ArrowLeft, RefreshCw, UserCheck } from 'lucide-react';
-
+import urlapi from '@/config/url'
 export default function PendingApprovalPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -39,8 +39,8 @@ export default function PendingApprovalPage() {
     if (!emailToCheck) return;
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${API_BASE}/auth/check-verification`, {
+    
+      const response = await fetch(`${urlapi.urlsapi.checkverification}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: emailToCheck })
@@ -71,8 +71,8 @@ export default function PendingApprovalPage() {
     setMessage('');
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${API_BASE}/auth/check-verification`, {
+      
+      const response = await fetch(`${urlapi.urlsapi.checkverification}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -121,8 +121,8 @@ export default function PendingApprovalPage() {
     setMessage('');
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${API_BASE}/auth/resend-verification`, {
+     
+      const response = await fetch(`${urlapi.urlsapi.resendverification}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })

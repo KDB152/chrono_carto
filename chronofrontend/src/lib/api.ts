@@ -1,7 +1,6 @@
 // API service for connecting to backend endpoints
 import { ERROR_MESSAGES } from './errorMessages';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+import urlapi from '../config/url';
 
 // Generic API request function
 async function apiRequest(endpoint: string, options: RequestInit = {}) {
@@ -17,7 +16,7 @@ async function apiRequest(endpoint: string, options: RequestInit = {}) {
   };
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
+    const response = await fetch(`${urlapi.apibase}${endpoint}`, config);
     
     if (!response.ok) {
       let errorData: any = {};
@@ -151,7 +150,7 @@ export const adminAPI = {
   approveUser: async (id: number, approve: boolean) => {
     try {
       // Essayer d'abord le backend avec authentification
-      const backendUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://www.chronocarto.tn/api'}/admin/users/${id}/approve`;
+      const backendUrl = `${urlapi.backendurlsapi.adminusers}/${id}${urlapi.backendurlsapi.aprove}`;
       const token = localStorage.getItem('token');
       
       const response = await fetch(backendUrl, {
@@ -556,7 +555,7 @@ export const messagingAPI = {
 
   uploadFile: (formData: FormData) => {
     const token = localStorage.getItem('token');
-    return fetch(`${API_BASE_URL}/messaging/upload`, {
+    return fetch(`${urlapi.urlsapi.messagingupload}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -572,7 +571,7 @@ export const messagingAPI = {
 
   downloadFile: (messageId: number) => {
     const token = localStorage.getItem('accessToken');
-    return fetch(`${API_BASE_URL}/messaging/download/${messageId}`, {
+    return fetch(`${urlapi.urlsapi.messagingdownload}/${messageId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -611,7 +610,7 @@ export const messagingAPI = {
 export const updateUserProfile = async (userId: number, profileData: any) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/users/${userId}/profile`, {
+    const response = await fetch(`${urlapi.backendurlsapi.user}/${userId}${urlapi.urlsapi.profile}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -645,7 +644,7 @@ export const changePassword = async (currentPassword: string, newPassword: strin
       throw new Error(ERROR_MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const response = await fetch(`${API_BASE_URL}/auth/change-password`, {
+    const response = await fetch(`${urlapi.backendurlsapi.authchangepassword}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -680,7 +679,7 @@ export const changePassword = async (currentPassword: string, newPassword: strin
 export const getUserProfile = async (userId: number) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/users/${userId}/profile`, {
+    const response = await fetch(`${urlapi.backendurlsapi.user}/${userId}${urlapi.urlsapi.profile}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -702,7 +701,7 @@ export const getUserProfile = async (userId: number) => {
 export const getStudentProfile = async (studentId: number) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/students/${studentId}`, {
+    const response = await fetch(`${urlapi.backendurlsapi.studentmangement}/${studentId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -724,7 +723,7 @@ export const getStudentProfile = async (studentId: number) => {
 export const updateStudentProfile = async (studentId: number, profileData: any) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/students/${studentId}`, {
+    const response = await fetch(`${urlapi.backendurlsapi.studentmangement}/${studentId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -748,7 +747,7 @@ export const updateStudentProfile = async (studentId: number, profileData: any) 
 export const getParentProfile = async (parentId: number) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/parents/${parentId}`, {
+    const response = await fetch(`${urlapi.backendurlsapi.parents}/${parentId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`
@@ -770,7 +769,7 @@ export const getParentProfile = async (parentId: number) => {
 export const updateParentProfile = async (parentId: number, profileData: any) => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(`${API_BASE_URL}/parents/${parentId}`, {
+    const response = await fetch(`${urlapi.backendurlsapi.parents}/${parentId}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

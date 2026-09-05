@@ -1,15 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-
+import urlapi from '@/config/url'
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const classFilter = searchParams.get('classLevel');
     const searchQuery = searchParams.get('search');
 
-    console.log('í ½í´„ API de fallback pour les paiements');
+    console.log('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ API de fallback pour les paiements');
 
     // RÃ©cupÃ©rer les Ã©tudiants depuis l'API students
-    const studentsResponse = await fetch(`${request.nextUrl.origin}/api/students`, {
+    const studentsResponse = await fetch(`${request.nextUrl.origin}${urlapi.backendurlsapi.students}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',

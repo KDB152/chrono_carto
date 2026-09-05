@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import urlapi from '@/config/url'
 
-const BACKEND_URL = process.env.BACKEND_URL!;
 
 export async function GET(
   request: NextRequest,
@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
-    const response = await fetch(`${BACKEND_URL}/study-sessions/${params.id}`, {
+    const response = await fetch(`${urlapi.backendurlsapi.studysessions}/${params.id}`, {
       headers: {
         ...(authHeader ? { Authorization: authHeader } : {})
       }
@@ -37,7 +37,7 @@ export async function PATCH(
     const body = await request.json();
     const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
 
-    const response = await fetch(`${BACKEND_URL}/study-sessions/${params.id}`, {
+    const response = await fetch(`${urlapi.backendurlsapi.studysessions}/${params.id}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -68,7 +68,7 @@ export async function DELETE(
 ) {
   try {
     const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
-    const response = await fetch(`${BACKEND_URL}/study-sessions/${params.id}`, {
+    const response = await fetch(`${urlapi.backendurlsapi.studysessions}/${params.id}`, {
       method: 'DELETE',
       headers: {
         ...(authHeader ? { Authorization: authHeader } : {})

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-
+import urlapi from '../config/url';
 interface RealStats {
   totalUsers: number;
   totalStudents: number;
@@ -34,8 +34,7 @@ export const useRealStats = () => {
     setError(null);
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      
+    
       // Recuperer l'utilisateur connecte
       const userDetails = localStorage.getItem('userDetails');
       const currentUser = userDetails ? JSON.parse(userDetails) : null;
@@ -53,7 +52,7 @@ export const useRealStats = () => {
         
         try {
           // Recuperer le total d'etudiants avec une limite elevee pour obtenir tous les resultats
-          const studentsResponse = await fetch(`${API_BASE}/admin/students?limit=1000`, {
+          const studentsResponse = await fetch(`${urlapi.urlsapi.adminstudiant}?limit=1000`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -73,7 +72,7 @@ export const useRealStats = () => {
 
         try {
           // Recuperer le total de parents avec une limite elevee pour obtenir tous les resultats
-          const parentsResponse = await fetch(`${API_BASE}/admin/parents?limit=1000`, {
+          const parentsResponse = await fetch(`${urlapi.urlsapi.adminparents}?limit=1000`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -100,7 +99,7 @@ export const useRealStats = () => {
       }
 
       // 2. Recuperer tous les quiz
-      const quizzesResponse = await fetch(`${API_BASE}/quizzes`);
+      const quizzesResponse = await fetch(`${urlapi.backendurlsapi.quizzes}`);
       let totalQuizzes = 0;
       let quizzes: any[] = [];
       
@@ -119,7 +118,7 @@ export const useRealStats = () => {
         try {
           // Recuperer les conversations de l'utilisateur avec authentification
           const token = localStorage.getItem('token');
-          const conversationsResponse = await fetch(`${API_BASE}/messaging/conversations?userId=${currentUserId}&userRole=${userRole}`, {
+          const conversationsResponse = await fetch(`${urlapi.urlsapi.conversation}?userId=${currentUserId}&userRole=${userRole}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'
@@ -133,7 +132,7 @@ export const useRealStats = () => {
             // Pour chaque conversation, recuperer les messages non lus
             for (const conversation of conversations) {
               try {
-                const messagesResponse = await fetch(`${API_BASE}/messaging/conversations/${conversation.id}/messages`, {
+                const messagesResponse = await fetch(`${urlapi.urlsapi.conversation}/${conversation.id}${urlapi.urlsapi.messages}`, {
                   headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -170,7 +169,7 @@ export const useRealStats = () => {
         try {
           // Recuperer les tentatives de l'utilisateur connecte avec authentification
           const token = localStorage.getItem('token');
-          const attemptsResponse = await fetch(`${API_BASE}/quizzes/attempts?student_id=${currentUserId}`, {
+          const attemptsResponse = await fetch(`${urlapi.backendurlsapi.attempts}?student_id=${currentUserId}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Content-Type': 'application/json'

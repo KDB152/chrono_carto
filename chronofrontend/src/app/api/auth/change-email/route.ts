@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mysql from 'mysql2/promise';
-
+import urlapi from '@/config/url'
 export async function POST(request: NextRequest) {
   try {
     const { newEmail, userId } = await request.json();
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       // Envoyer l'email de vérification
       try {
         console.log('📧 Debug - Envoi de l\'email de vérification...');
-        const emailResponse = await fetch(`${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL!}/api/auth/send-verification-email`, {
+        const emailResponse = await fetch(`${process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL!}${urlapi.backendurlsapi.apisendverificationemail}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

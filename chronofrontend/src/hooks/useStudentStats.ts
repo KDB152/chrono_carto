@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-
+import urlapi from '../config/url';
 interface StudentStats {
   completedQuizzes: number;
   averageScore: number;
@@ -28,8 +28,7 @@ export const useStudentStats = () => {
     setError(null);
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      
+     
       // Récupérer l'utilisateur connecté
       const userDetails = localStorage.getItem('userDetails');
       const currentUser = userDetails ? JSON.parse(userDetails) : null;
@@ -42,7 +41,7 @@ export const useStudentStats = () => {
       console.log('🎓 Chargement des statistiques étudiant pour:', currentUserId);
 
       // 1. Récupérer tous les quiz disponibles
-      const quizzesResponse = await fetch(`${API_BASE}/quizzes`);
+      const quizzesResponse = await fetch(`${urlapi.backendurlsapi.quizzes}`);
       let totalQuizzes = 0;
       
       if (quizzesResponse.ok) {
@@ -59,7 +58,7 @@ export const useStudentStats = () => {
       try {
         // Utiliser le bon endpoint avec l'authentification
         const token = localStorage.getItem('token');
-        const attemptsResponse = await fetch(`${API_BASE}/quizzes/attempts?student_id=${currentUserId}`, {
+        const attemptsResponse = await fetch(`${urlapi.backendurlsapi.attempts}?student_id=${currentUserId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -93,7 +92,7 @@ export const useStudentStats = () => {
       
       try {
         const token = localStorage.getItem('token');
-        const conversationsResponse = await fetch(`${API_BASE}/messaging/conversations?userId=${currentUserId}&userRole=student`, {
+        const conversationsResponse = await fetch(`${urlapi.urlsapi.conversation}?userId=${currentUserId}&userRole=student`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json'
@@ -106,7 +105,7 @@ export const useStudentStats = () => {
           
           for (const conversation of conversations) {
             try {
-              const messagesResponse = await fetch(`${API_BASE}/messaging/conversations/${conversation.id}/messages`, {
+              const messagesResponse = await fetch(`${urlapi.urlsapi.conversation}/${conversation.id}${urlapi.urlsapi.messages}`, {
                 headers: {
                   'Authorization': `Bearer ${token}`,
                   'Content-Type': 'application/json'

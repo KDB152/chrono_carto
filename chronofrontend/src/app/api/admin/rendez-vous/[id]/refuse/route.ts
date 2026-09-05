@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL!;
+import urlapi from '@/config/url'
+const API_BASE = urlapi.apibase!;
 
 export async function PATCH(
   request: NextRequest,
@@ -25,7 +25,7 @@ export async function PATCH(
     const body = await request.json();
     console.log('?? Request body:', body);
 
-    const backendUrl = `${API_BASE}/admin/rendez-vous/${params.id}/refuse`;
+    const backendUrl = `${API_BASE}${urlapi.backendurlsapi.rendezvous}/${params.id}${urlapi.backendurlsapi.refuse}`;
     console.log('?? Calling backend URL:', backendUrl);
     console.log('?? Auth header:', authHeader ? 'Present' : 'Missing');
 

@@ -38,7 +38,7 @@ import {
   Home,
   ChevronRight
 } from 'lucide-react';
-
+import urlapi from '@/config/url';
 // Types pour TypeScript - Interface pour les fichiers de la base de données
 interface FileFromDB {
   id: number;
@@ -155,7 +155,7 @@ const FileManagementTabImproved = () => {
   // Fonctions pour la gestion des dossiers
   const loadFolders = async () => {
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+     
       const token = getAuthToken();
       
       if (!token) {
@@ -164,7 +164,7 @@ const FileManagementTabImproved = () => {
       }
 
       // Utiliser la nouvelle API pour les dossiers globaux
-      const endpoint = `${API_BASE}/new-structure/dossiers`;
+      const endpoint = `${urlapi.backendurlsapi.endpointdossier}`;
       
       const response = await fetch(endpoint, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -216,7 +216,7 @@ const FileManagementTabImproved = () => {
 
   const loadFolderContents = async (folderId: number) => {
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      
       const token = getAuthToken();
       
       if (!token) {
@@ -225,7 +225,7 @@ const FileManagementTabImproved = () => {
       }
 
       // Récupérer les sous-dossiers du dossier global
-      const sousDossiersResponse = await fetch(`${API_BASE}/new-structure/dossiers/${folderId}/sous-dossiers`, {
+      const sousDossiersResponse = await fetch(`${urlapi.backendurlsapi.endpointdossier}/${folderId}${urlapi.backendurlsapi.sousdossier}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -260,7 +260,7 @@ const FileManagementTabImproved = () => {
 
   const loadSousDossierFiles = async (sousDossierId: number) => {
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+   
       const token = getAuthToken();
       
       if (!token) {
@@ -269,7 +269,7 @@ const FileManagementTabImproved = () => {
       }
 
       // Récupérer les fichiers du sous-dossier
-      const fichiersResponse = await fetch(`${API_BASE}/new-structure/sous-dossiers/${sousDossierId}/fichiers`, {
+      const fichiersResponse = await fetch(`${urlapi.backendurlsapi.pathfichiers}/${sousDossierId}${urlapi.backendurlsapi.fichiers}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

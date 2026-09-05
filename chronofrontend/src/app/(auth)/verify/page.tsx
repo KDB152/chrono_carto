@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { CheckCircle, XCircle, Loader2, ArrowRight } from 'lucide-react';
-
+import urlapi from '@/config/url'
 export default function VerifyPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -26,8 +26,8 @@ export default function VerifyPage() {
 
   const verifyEmail = async (token: string) => {
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${API_BASE}/auth/verify-email`, {
+     
+      const response = await fetch(`${urlapi.urlsapi.verifyEmail}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token })

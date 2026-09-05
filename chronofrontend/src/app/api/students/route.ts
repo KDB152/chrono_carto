@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-
+import urlapi from '@/config/url'
 const BACKEND_URL = process.env.BACKEND_URL!;
 
 export async function GET(request: NextRequest) {
   try {
-    const response = await fetch(`${BACKEND_URL}/students`);
+    const response = await fetch(`${urlapi.backendurlsapi.childs}`, );
     const data = await response.json();
 
     if (!response.ok) {

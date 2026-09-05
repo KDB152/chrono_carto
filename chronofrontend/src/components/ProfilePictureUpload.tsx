@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Camera, Upload, X, User } from 'lucide-react';
-
+import urlapi from '../config/url';
 interface ProfilePictureUploadProps {
   userId: number;
   currentImageUrl?: string;
@@ -81,12 +81,11 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
       formData.append('profilePicture', file);
 
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
+      
       // Essayer d'abord le backend
       let response;
       try {
-        response = await fetch(`${API_BASE}/pdp/upload`, {
+        response = await fetch(`${urlapi.urlsapi.pdpupload}`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -96,7 +95,7 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
       } catch (backendError) {
         console.log('⚠️ Backend non accessible, utilisation du fallback frontend');
         // Fallback vers l'endpoint frontend
-        response = await fetch('/api/profile-picture/upload', {
+        response = await fetch(`${urlapi.backendurlsapi.endpoint}`, {
           method: 'POST',
           body: formData,
         });
@@ -152,9 +151,8 @@ const ProfilePictureUpload: React.FC<ProfilePictureUploadProps> = ({
 
     try {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-
-      const response = await fetch(`${API_BASE}/pdp/me`, {
+      
+      const response = await fetch(`${urlapi.backendurlsapi.photoprofile}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

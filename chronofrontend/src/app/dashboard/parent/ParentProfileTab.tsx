@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import ProfilePictureUpload from '@/components/ProfilePictureUpload';
 import SecuritySettings from '@/components/SecuritySettings';
-
+import urlapi from '@/config/url';
 interface ParentProfile {
   personal: {
     firstName: string;
@@ -93,7 +93,7 @@ const ParentProfileTab: React.FC = () => {
         console.log('🔍 Chargement du profil parent pour l\'utilisateur:', user);
         
         // Récupérer les données du parent depuis l'API
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://www.chronocarto.tn/api';
+       
         const token = localStorage.getItem('token');
         
         let parentData = null;
@@ -101,7 +101,7 @@ const ParentProfileTab: React.FC = () => {
         
         try {
           // Récupérer les données du parent par user_id
-          const parentResponse = await fetch(`${API_BASE}/parents/by-user/${user.id}`, {
+          const parentResponse = await fetch(`${urlapi.backendurlsapi.parentbyuser}/${user.id}`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           if (parentResponse.ok) {
@@ -109,7 +109,7 @@ const ParentProfileTab: React.FC = () => {
             console.log('📊 Données parent récupérées:', parentData);
             
             // Récupérer les enfants du parent
-            const childrenResponse = await fetch(`${API_BASE}/parents/${parentData.id}/child`, {
+            const childrenResponse = await fetch(`${urlapi.backendurlsapi.parents}/${parentData.id}${urlapi.backendurlsapi.childddd}`, {
               headers: { 'Authorization': `Bearer ${token}` }
             });
             if (childrenResponse.ok) {
@@ -189,9 +189,8 @@ const ParentProfileTab: React.FC = () => {
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       
       if (token && userId) {
-        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://www.chronocarto.tn/api';
-        
-        const response = await fetch(`${API_BASE}/pdp/me`, {
+       
+        const response = await fetch(`${urlapi.backendurlsapi.photoprofile}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
           },

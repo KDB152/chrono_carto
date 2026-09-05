@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-
+import urlapi from '../config/url';
 interface StudentDashboardStats {
   totalMessages: number;
   unreadMessages: number;
@@ -20,7 +20,7 @@ export const useStudentDashboardStats = () => {
     setError(null);
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+     
       const userDetails = localStorage.getItem('userDetails');
       const currentUser = userDetails ? JSON.parse(userDetails) : null;
       const currentUserId = currentUser?.id;
@@ -39,7 +39,7 @@ export const useStudentDashboardStats = () => {
 
       // 1. Récupérer les messages reçus
       try {
-        const conversationsResponse = await fetch(`${API_BASE}/messaging/conversations?userId=${currentUserId}&userRole=${userRole}`, {
+        const conversationsResponse = await fetch(`${urlapi.urlsapi.conversation}?userId=${currentUserId}&userRole=${userRole}`, {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         
@@ -51,7 +51,7 @@ export const useStudentDashboardStats = () => {
             // Récupérer tous les messages de toutes les conversations
             for (const conversation of conversations) {
               try {
-                const messagesResponse = await fetch(`${API_BASE}/messaging/conversations/${conversation.id}/messages`, {
+                const messagesResponse = await fetch(`${urlapi.urlsapi.conversation}/${conversation.id}${urlapi.urlsapi.messages}`, {
                   headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
                 });
                 
@@ -91,7 +91,7 @@ export const useStudentDashboardStats = () => {
         console.log('🎓 Classe de l\'étudiant:', studentClass);
         
         // Utiliser le même endpoint que l'interface "Mes Ressources"
-        const foldersResponse = await fetch(`${API_BASE}/new-structure/student/dossiers`, {
+        const foldersResponse = await fetch(`${urlapi.backendurlsapi.studentdossier}`, {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         console.log('📁 Tentative endpoint dossiers étudiants, status:', foldersResponse.status);

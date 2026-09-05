@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import urlapi from '@/config/url'
 
-const BACKEND_URL = process.env.BACKEND_URL!;
 
 export async function GET(request: NextRequest) {
   try {
@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const date = searchParams.get('date');
     const subject = searchParams.get('subject');
 
-    let url = `${BACKEND_URL}/study-sessions`;
+    let url = `${urlapi.backendurlsapi.studysessions}`;
     if (date || subject) {
       const params = new URLSearchParams();
       if (date) params.append('date', date);
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const authHeader = request.headers.get('Authorization') || request.headers.get('authorization');
 
-    const response = await fetch(`${BACKEND_URL}/study-sessions`, {
+    const response = await fetch(`${urlapi.backendurlsapi.studysessions}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

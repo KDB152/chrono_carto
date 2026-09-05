@@ -20,7 +20,7 @@ import {
   BookOpen,
   RefreshCw,
 } from 'lucide-react';
-
+import urlapi from '@/config/url';
 type MeetingStatus = 'pending' | 'accepted' | 'refused' | 'cancelled';
 
 interface RendezVous {
@@ -102,11 +102,11 @@ const MeetingsTab: React.FC = () => {
       }
       
       // Utiliser la nouvelle API pour récupérer les informations complètes
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       
       // D'abord, récupérer l'ID du parent
-      const parentResponse = await fetch(`${API_BASE}/parents/by-user/${parentUserId}`, {
+      const parentResponse = await fetch(`${urlapi.backendurlsapi.parentbyuser}/${parentUserId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -117,7 +117,7 @@ const MeetingsTab: React.FC = () => {
       const parentData = await parentResponse.json();
       
       // Maintenant récupérer les enfants
-      const response = await fetch(`${API_BASE}/parents/children?parentId=${parentData.id}`, {
+      const response = await fetch(`${urlapi.backendurlsapi.parentbychildren}?parentId=${parentData.id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -196,7 +196,7 @@ const MeetingsTab: React.FC = () => {
       // Récupérer le token d'authentification
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       
-      const response = await fetch(`/api/rendez-vous?parentId=${parentId}`, {
+      const response = await fetch(`${urlapi.backendurlsapi.apirendivous}?parentId=${parentId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

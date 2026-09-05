@@ -61,7 +61,7 @@ import MessagesTab from './MessagesTab';
 import ProfileTab from './ProfileTab';
 import CalendarTab from './CalendarTab';
 import ResourcesTab from './ResourcesTab';
-
+import urlapi from '@/config/url';
 type TabType = 'home' | 'quizzes' | 'quiz-take' | 'results' | 'progress' | 'messages' | 'profile' | 'achievements' | 'calendar' | 'resources';
 
 interface StudentUser {
@@ -141,7 +141,7 @@ const StudentDashboard = () => {
   const { stats: realStats } = useRealStats();
 
   useEffect(() => {
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+   
     try {
       const raw = typeof window !== 'undefined' ? localStorage.getItem('userDetails') : null;
       if (!raw) return;
@@ -158,7 +158,7 @@ const StudentDashboard = () => {
         streak: 0,
         lastActivity: new Date().toISOString(),
       };
-      fetch(`${API_BASE}/students/by-user/${user.id}`)
+      fetch(`${urlapi.backendurlsapi.studentsbyuser}/${user.id}`)
         .then(r => r.json())
         .then(s => {
           const student = { ...base, grade: s?.class_level || '', birthDate: s?.birth_date || '' };

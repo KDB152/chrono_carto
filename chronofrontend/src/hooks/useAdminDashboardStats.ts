@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-
+import urlapi from '../config/url';
 interface AdminDashboardStats {
   unreadMessages: number;
   pendingMeetings: number;
@@ -18,7 +18,7 @@ export const useAdminDashboardStats = () => {
     setError(null);
 
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+     
       const token = localStorage.getItem('token');
       const userDetails = localStorage.getItem('userDetails');
       const currentUser = userDetails ? JSON.parse(userDetails) : null;
@@ -37,7 +37,7 @@ export const useAdminDashboardStats = () => {
       // Get unread messages
       try {
         console.log('Fetching conversations for admin:', currentUserId);
-        const conversationsResponse = await fetch(`${API_BASE}/messaging/conversations?userId=${currentUserId}&userRole=${userRole}`, {
+        const conversationsResponse = await fetch(`${urlapi.urlsapi.conversation}?userId=${currentUserId}&userRole=${userRole}`, {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
 
@@ -48,7 +48,7 @@ export const useAdminDashboardStats = () => {
           console.log('Conversations found for admin:', conversations.length);
 
           for (const conversation of conversations) {
-            const messagesResponse = await fetch(`${API_BASE}/messaging/conversations/${conversation.id}/messages`, {
+            const messagesResponse = await fetch(`${urlapi.urlsapi.conversation}/${conversation.id}/messages`, {
               headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
             });
 
@@ -73,7 +73,7 @@ export const useAdminDashboardStats = () => {
       // Get pending meetings
       try {
         console.log('Fetching rendez-vous for admin dashboard');
-        const rendezVousResponse = await fetch(`${API_BASE}/rendez-vous`, {
+        const rendezVousResponse = await fetch(`${urlapi.urlsapi.rendezvous}`, {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
 

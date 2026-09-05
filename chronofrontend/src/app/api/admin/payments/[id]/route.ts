@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-
+import urlapi from '@/config/url'
 // URL de l'API backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
+
 
 export async function PATCH(
   request: NextRequest,
@@ -14,7 +14,7 @@ export async function PATCH(
     console.log('?? Mise � jour du paiement:', paymentId, body);
 
     // Construire l'URL de l'API backend
-    const backendUrl = `${API_BASE_URL}/admin/payments/${paymentId}`;
+    const backendUrl = `${urlapi.backendurlsapi.payments}/${paymentId}`;
 
     try {
       // Appeler l'API backend
@@ -64,7 +64,7 @@ export async function GET(
     console.log('?? R�cup�ration du paiement:', paymentId);
 
     // Construire l'URL de l'API backend
-    const backendUrl = `${API_BASE_URL}/admin/payments/${paymentId}`;
+    const backendUrl = `${urlapi.backendurlsapi.payments}/${paymentId}`;
 
     try {
       // Appeler l'API backend

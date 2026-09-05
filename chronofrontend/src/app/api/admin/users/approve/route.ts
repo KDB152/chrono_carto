@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-
+import urlapi from '@/config/url'
 // URL de l'API backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://www.chronocarto.tn/api';
+
 
 export async function PATCH(request: NextRequest) {
   try {
@@ -17,19 +17,19 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    console.log(`í ½í´„ Appel API backend pour approbation utilisateur ${userId}:`, approve);
-    console.log(`í ¼í¼ URL backend: ${API_BASE_URL}/admin/users/${userId}/approve`);
+    console.log(`ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Appel API backend pour approbation utilisateur ${userId}:`, approve);
+    console.log(`ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ URL backend: ${urlapi.backendurlsapi.adminusers}/${userId}${urlapi.backendurlsapi.aprove}`);
 
     // RÃ©cupÃ©rer le token d'authentification depuis les headers
     const authHeader = request.headers.get('authorization') || request.headers.get('Authorization');
     const token = authHeader?.replace('Bearer ', '') || authHeader;
 
-    console.log('í ½í´‘ Token d\'authentification:', token ? 'PrÃ©sent' : 'Manquant');
-    console.log('í ½í´‘ Headers reÃ§us:', Object.fromEntries(request.headers.entries()));
+    console.log('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Token d\'authentification:', token ? 'PrÃ©sent' : 'Manquant');
+    console.log('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Headers reÃ§us:', Object.fromEntries(request.headers.entries()));
 
     // Appeler l'API backend
-    const backendUrl = `${API_BASE_URL}/admin/users/${userId}/approve`;
-    console.log(`í ¼í¼ Appel vers: ${backendUrl}`);
+    const backendUrl = `${urlapi.backendurlsapi.adminusers}/${userId}${urlapi.backendurlsapi.aprove}`;
+    console.log(` Appel vers: ${backendUrl}`);
     
     const response = await fetch(backendUrl, {
       method: 'PATCH',
@@ -40,7 +40,7 @@ export async function PATCH(request: NextRequest) {
       body: JSON.stringify({ approve }),
     });
 
-    console.log(`í ½í³¡ RÃ©ponse backend: ${response.status} ${response.statusText}`);
+    console.log(`ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ RÃ©ponse backend: ${response.status} ${response.statusText}`);
 
     if (!response.ok) {
       const errorData = await response.json();

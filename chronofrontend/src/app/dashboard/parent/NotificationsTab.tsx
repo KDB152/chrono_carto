@@ -30,7 +30,7 @@ import {
   RefreshCw,
   Loader2,
 } from 'lucide-react';
-
+import urlapi from '@/config/url';
 export type NotificationType = 'meeting_reminder' | 'quiz_completed' | 'payment_overdue' | 'unread_message' | 'meeting_scheduled' | 'payment_reminder';
 export type NotificationPriority = 'low' | 'medium' | 'high' | 'urgent';
 
@@ -51,7 +51,7 @@ export interface Notification {
 }
 
 // API functions
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 
 // Fonction pour obtenir l'ID de l'utilisateur parent (pour les tests)
 const getParentUserId = (): number => {
@@ -62,7 +62,7 @@ const getParentUserId = (): number => {
 
 const fetchNotifications = async (limit = 50, offset = 0): Promise<Notification[]> => {
   const userId = getParentUserId();
-  const response = await fetch(`${API_BASE_URL}/notifications/test/user/${userId}`, {
+  const response = await fetch(`${urlapi.backendurlsapi.notificationtest}/${userId}`, {
     headers: {
       'Content-Type': 'application/json',
     },
@@ -77,7 +77,7 @@ const fetchNotifications = async (limit = 50, offset = 0): Promise<Notification[
 
 const fetchUnreadCount = async (): Promise<number> => {
   const userId = getParentUserId();
-  const response = await fetch(`${API_BASE_URL}/notifications/test/user/${userId}/unread-count`, {
+  const response = await fetch(`${urlapi.backendurlsapi.notificationtest}/${userId}${urlapi.backendurlsapi.unredcount}`, {
     headers: {
       'Content-Type': 'application/json',
     },

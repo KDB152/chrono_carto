@@ -48,7 +48,7 @@ import {
   Shield,
   Scroll
 } from 'lucide-react';
-
+import urlapi from '@/config/url';
 interface Quiz {
   id: string;
   title: string;
@@ -155,7 +155,7 @@ const QuizListTab: React.FC<QuizListTabProps> = ({ onStartQuiz }) => {
         }
         
         // Utiliser l'API de filtrage par groupe au lieu de tous les quizzes
-        const apiUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/quizzes/accessible/${studentId}`;
+        const apiUrl = `${urlapi.backendurlsapi.quizzaccisible}/${studentId}`;
         console.log('🔍 Debug - API URL:', apiUrl);
         
         let response;
@@ -259,7 +259,7 @@ const QuizListTab: React.FC<QuizListTabProps> = ({ onStartQuiz }) => {
             const originalQuiz = originalQuizzes[i];
             
             try {
-              const attemptsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/quizzes/attempts?quiz_id=${quiz.id}&student_id=${studentId}`);
+              const attemptsResponse = await fetch(`${urlapi.backendurlsapi.attempts}?quiz_id=${quiz.id}&student_id=${studentId}`);
               if (attemptsResponse.ok) {
                 const attempts = await attemptsResponse.json();
                 if (attempts && attempts.length > 0) {

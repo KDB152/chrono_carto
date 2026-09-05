@@ -1,0 +1,95 @@
+const url=`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}`
+const apibase=`${process.env.NEXT_PUBLIC_API_URL }`;
+const backendurl=`${process.env.BACKEND_URL}`
+
+
+const urlsapi={
+    forgotPassword:`${url}/auth/forgot-password`,
+    login:`${url}/auth/login`,
+    checkverification:`${url}/auth/check-verification`,
+    resendverification:`${url}/auth/resend-verification`,
+    register:`${url}/auth/register`,
+    resetPassword:`${url}/auth/reset-password`,
+    verifyEmail:`${url}/auth/verify-email`,
+    authme:`${url}/auth/me`,
+    resetp:`${apibase}/auth/send-password-reset-code`,
+    resetlink:`${apibase}/auth/send-password-reset-link`,
+    verifr:`${apibase}/auth/verify-password-reset-code`,
+    pdpupload:`${apibase}/pdp/upload`,
+    changeemail:`${apibase}/auth/change-email`,
+    pdfuser:`${apibase}/pdp/user`,
+    verifcode:`${apibase}/auth/send-verification-code`,
+    veriflink:`${apibase}/auth/send-verification-link`,
+    authverify:`${apibase}/auth/verify-code`,
+    authtoken:`${apibase}/auth/verify-token`,
+    conversation:`${apibase}/messaging/conversations`,
+    rendezvous:`${apibase}/rendez-vous`,
+    messages:`/messages`,
+    adminstudiant:`${apibase}/admin/students`,
+    adminparents:`${apibase}/admin/parents`,
+    messagingupload:`${apibase}/messaging/upload`,
+    messagingdownload:`${apibase}/messaging/download`,
+    profile:`/profile`,
+    
+    
+}
+
+const backendurlsapi={
+
+payments:`${apibase}/admin/payments`,
+students:`/api/students`,
+rendezvous:`/admin/rendez-vous`,
+accept:`/accept`,
+refuse:`/refuse`,
+apibackend:`/api/admin/payments-backend`,
+user:`${apibase}/users`,
+adminusers:`${apibase}/admin/users`,
+aprove:`/approve`,
+attendance:`${apibase}/attendance`,
+apisendverificationemail:`/api/auth/send-verification-email`,
+verifiyemail:`/verify-email`,
+session:`${backendurl}/study-sessions`,
+childs:`${backendurl}/students`,
+paymentstatus:`/status`,
+payment:`${apibase}/payments`,
+endpoint:`/api/profile-picture/upload`,
+quiz:`/api/quizzes/parent-results`,
+apirendivous:`/api/rendez-vous`,
+attempts:`${apibase}/quizzes/attempts`,
+quizzes:`${apibase}/quizzes`,
+studysessions:`${backendurl}/study-sessions`,
+photoprofile:`${apibase}/pdp/me`,
+updatephoto:`${apibase}/auth/update-profile`,
+authchangepassword:`${apibase}/auth/change-password`,
+attendanceapi:`/api/attendance`,
+studysessionsapi:`/api/study-sessions`,
+quizattemt:`${apibase}/quiz-attempts/recent`,
+endpointdossier:`${apibase}/new-structure/dossiers`,
+sousdossier:`/sous-dossiers`,
+fichiers:`/fichiers`,
+pathfichiers:`${apibase}/new-structure/sous-dossiers`,
+uploadfichier:`${apibase}/new-structure/fichiers/upload`,
+newstructurefichiers:`${apibase}/new-structure/fichiers`,
+files:`${apibase}/files`,
+apiadminrendivous:`/api/admin/rendez-vous`,
+studentmangement:`${apibase}/students`,
+parent:`/parent`,
+parents:`${apibase}/parents`,
+childddd:`/child`,
+parentbyuser:`${apibase}/parents/by-user`,
+parentbychildren:`${apibase}/parents/children`,
+notificationtest:`${apibase}/notifications/test/user`,
+unredcount:`/unread-count`,
+questions:`/questions`,
+answers:`/answers`,
+studentsbyuser:`${apibase}/students/by-user`,
+quizzaccisible:`${apibase}/quizzes/accessible`,
+download:`/download`,
+studentdossier:`${apibase}/new-structure/student/dossiers`,
+studentsousdossier:`${apibase}/new-structure/student/sous-dossiers`,
+
+
+}
+
+
+export default {urlsapi,url,apibase,backendurlsapi,backendurl};

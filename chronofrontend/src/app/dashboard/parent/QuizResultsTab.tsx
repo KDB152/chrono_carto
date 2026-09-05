@@ -120,7 +120,7 @@ import {
   Milk,
   MessageSquare
 } from 'lucide-react';
-
+import urlapi from '@/config/url';
 interface Child {
   id: string;
   firstName: string;
@@ -204,8 +204,8 @@ const QuizResultsTab: React.FC<QuizResultsTabProps> = ({
           console.log('🔍 Chargement des résultats pour l\'enfant:', selectedChild.id);
           
           // Utiliser directement l'endpoint /api/quizzes/attempts comme dans le student dashboard
-          const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://www.chronocarto.tn/api';
-          const response = await fetch(`${API_BASE}/quizzes/attempts?student_id=${selectedChild.id}`);
+         
+          const response = await fetch(`${urlapi.backendurlsapi.quizzes}/attempts?student_id=${selectedChild.id}`);
           
           if (response.ok) {
             const attempts = await response.json();
@@ -216,20 +216,20 @@ const QuizResultsTab: React.FC<QuizResultsTabProps> = ({
               attempts.map(async (attempt: any) => {
                 try {
                   // Récupérer les détails du quiz
-                  const quizResponse = await fetch(`${API_BASE}/quizzes/${attempt.quiz_id}`);
+                  const quizResponse = await fetch(`${urlapi.backendurlsapi.quizzes}/${attempt.quiz_id}`);
                   if (!quizResponse.ok) return null;
                   
                   const quiz = await quizResponse.json();
                   
                   // Récupérer les questions du quiz pour calculer les statistiques
-                  const questionsResponse = await fetch(`${API_BASE}/quizzes/${attempt.quiz_id}/questions`);
+                  const questionsResponse = await fetch(`${urlapi.backendurlsapi.quizzes}/${attempt.quiz_id}${urlapi.backendurlsapi.questions}`);
                   let questions = [];
                   if (questionsResponse.ok) {
                     questions = await questionsResponse.json();
                   }
                   
                   // Récupérer les réponses de l'étudiant
-                  const answersResponse = await fetch(`${API_BASE}/quizzes/attempts/${attempt.id}/answers`);
+                  const answersResponse = await fetch(`${urlapi.backendurlsapi.attempts}/${attempt.id}${urlapi.backendurlsapi.answers}`);
                   let studentAnswers = {};
                   if (answersResponse.ok) {
                     studentAnswers = await answersResponse.json();

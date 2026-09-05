@@ -61,7 +61,7 @@ import {
   Activity,
   Loader2
 } from 'lucide-react';
-
+import urlapi from '@/config/url';
 // Types et interfaces
 interface Student {
   id: string;
@@ -363,7 +363,7 @@ const ProgressTab: React.FC<ProgressTabProps> = ({ student, searchQuery }) => {
 
       console.log('📄 Chargement de la progression pour l\'étudiant:', studentId);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/quizzes/attempts?student_id=${studentId}`);
+      const response = await fetch(`${urlapi.backendurlsapi.attempts}?student_id=${studentId}`);
       
       if (!response.ok) {
         throw new Error(`Échec de récupération des tentatives: ${response.status}`);
@@ -374,7 +374,7 @@ const ProgressTab: React.FC<ProgressTabProps> = ({ student, searchQuery }) => {
 
       const resultsWithDetails = await Promise.allSettled(
         attempts.map(async (attempt: any) => {
-          const quizResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/quizzes/${attempt.quiz_id}`);
+          const quizResponse = await fetch(`${urlapi.backendurlsapi.quizzes}/${attempt.quiz_id}`);
           if (!quizResponse.ok) return null;
           
           const quiz = await quizResponse.json();

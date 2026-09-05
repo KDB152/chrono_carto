@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-
+import urlapi from '../config/url';
 interface ParentDashboardStats {
   completedQuizzes: number;
   averageScore: number;
@@ -26,7 +26,7 @@ export const useParentDashboardStats = () => {
     setError(null);
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+     
       const userDetails = localStorage.getItem('userDetails');
       const currentUser = userDetails ? JSON.parse(userDetails) : null;
       const currentUserId = currentUser?.id;
@@ -50,7 +50,7 @@ export const useParentDashboardStats = () => {
        let currentParentId = null;
        try {
          console.log('?? Getting parent ID for user:', currentUserId);
-         const parentResponse = await fetch(`${API_BASE}/parents/by-user/${currentUserId}`, {
+         const parentResponse = await fetch(`${urlapi.backendurlsapi.parentbyuser}/${currentUserId}`, {
            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
          });
          
@@ -69,7 +69,7 @@ export const useParentDashboardStats = () => {
        try {
          console.log('?? Fetching children for parent:', currentParentId);
          // Utiliser directement l'API backend au lieu de l'API frontend
-         const childrenResponse = await fetch(`${API_BASE}/parents/children?parentId=${currentParentId}`, {
+         const childrenResponse = await fetch(`${urlapi.backendurlsapi.parentbychildren}?parentId=${currentParentId}`, {
            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
          });
          
@@ -81,8 +81,10 @@ export const useParentDashboardStats = () => {
              for (const child of children) {
                try {
                  console.log('?? Fetching quiz attempts for child', child.id);
-                 const resultsResponse = await fetch(`${API_BASE}/quizzes/attempts?student_id=${child.id}`);
-                 
+                 const resultsResponse = await fetch(`${urlapi.backendurlsapi.attempts}?student_id=${child.id}`, {
+                   headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+                 });
+
                  console.log('?? API Response status:', resultsResponse.status);
                  
                  if (resultsResponse.ok) {
@@ -127,7 +129,7 @@ export const useParentDashboardStats = () => {
 
       // Get messages
       try {
-        const conversationsResponse = await fetch(`${API_BASE}/messaging/conversations?userId=${currentUserId}`, {
+        const conversationsResponse = await fetch(`${urlapi.urlsapi.conversation}?userId=${currentUserId}`, {
           headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
         });
         
@@ -136,7 +138,7 @@ export const useParentDashboardStats = () => {
           
           for (const conversation of conversations) {
             try {
-              const messagesResponse = await fetch(`${API_BASE}/messaging/conversations/${conversation.id}/messages`, {
+              const messagesResponse = await fetch(`${urlapi.urlsapi.conversation}/${conversation.id}${urlapi.urlsapi.messages}`, {
                 headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
               });
               
@@ -161,7 +163,7 @@ export const useParentDashboardStats = () => {
        // Get meetings
        if (currentParentId) {
          try {
-           const rendezVousResponse = await fetch(`${API_BASE}/rendez-vous?parentId=${currentParentId}`, {
+           const rendezVousResponse = await fetch(`${urlapi.urlsapi.rendezvous}?parentId=${currentParentId}`, {
              headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
            });
          

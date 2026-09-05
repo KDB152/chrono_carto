@@ -19,7 +19,7 @@ import {
   Edit
 } from 'lucide-react';
 import { AnimatedPage, AnimatedCard, AnimatedButton, AnimatedTable, AnimatedTableRow, AnimatedStats } from '../../../components/ui/animations';
-
+import urlapi from '@/config/url';
 import { AVAILABLE_CLASSES } from '@/constants/classes';
 
 interface Payment {
@@ -77,7 +77,7 @@ const PaymentsManagementTab: React.FC = () => {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       
       // Récupérer les données depuis l'API attendance qui contient les vraies données de présence
-      const response = await fetch('/api/attendance', {
+      const response = await fetch(`${urlapi.backendurlsapi.attendanceapi}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import './ForgotPassword.css';
-
+import urlapi from '../config/url';
 interface ForgotPasswordProps {
   mode?: 'code' | 'link';
 }
@@ -40,8 +40,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ mode = 'code' }) => {
     setError('');
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${API_BASE}/auth/send-password-reset-code`, {
+      const response = await fetch(`${urlapi.urlsapi.resetp}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,8 +73,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ mode = 'code' }) => {
     setError('');
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${API_BASE}/auth/send-password-reset-link`, {
+      const response = await fetch(`${urlapi.urlsapi.resetlink}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -108,8 +106,8 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ mode = 'code' }) => {
     setError('');
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${API_BASE}/auth/verify-password-reset-code`, {
+    
+      const response = await fetch(`${urlapi.urlsapi.verifr}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -148,8 +146,7 @@ const ForgotPassword: React.FC<ForgotPasswordProps> = ({ mode = 'code' }) => {
     setError('');
     
     try {
-      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const response = await fetch(`${API_BASE}/auth/reset-password`, {
+      const response = await fetch(`${urlapi.urlsapi.resetPassword}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

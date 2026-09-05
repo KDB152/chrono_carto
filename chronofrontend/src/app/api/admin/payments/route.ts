@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-
+import urlapi from '@/config/url'
 // URL de l'API backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL!;
+
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     const searchQuery = searchParams.get('search');
 
     // Construire l'URL de l'API backend
-    const backendUrl = new URL(`${API_BASE_URL}/admin/payments`);
+    const backendUrl = new URL(`${urlapi.backendurlsapi.payments}`);
     if (classFilter && classFilter !== 'Total') {
       backendUrl.searchParams.append('classLevel', classFilter);
     }
@@ -50,10 +50,10 @@ export async function GET(request: NextRequest) {
       
       try {
         // Utiliser l'endpoint de fallback frontend
-        const fallbackResponse = await fetch(`${request.nextUrl.origin}/api/admin/payments-backend?classLevel=${classFilter || 'Total'}&search=${searchQuery || ''}`);
+        const fallbackResponse = await fetch(`${request.nextUrl.origin}${urlapi.backendurlsapi.apibackend}?classLevel=${classFilter || 'Total'}&search=${searchQuery || ''}`);
         if (fallbackResponse.ok) {
           const fallbackData = await fallbackResponse.json();
-          console.log('? Donn�es de fallback r�cup�r�es:', fallbackData);
+          console.log('? Donnes de fallback rcupres:', fallbackData);
           return NextResponse.json(fallbackData);
         }
       } catch (fallbackError) {
@@ -151,7 +151,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Construire l'URL de l'API backend
-    const backendUrl = `${API_BASE_URL}/admin/payments/${id}`;
+    const backendUrl = `${urlapi.backendurlsapi.payments}/${id}`;
 
     try {
       // Appeler l'API backend

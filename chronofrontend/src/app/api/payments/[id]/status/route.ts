@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import urlapi from '@/config/url'
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL!;
 
 export async function PATCH(
   request: NextRequest,
@@ -18,7 +18,7 @@ export async function PATCH(
       return NextResponse.json({ success: false, message: 'Token manquant' }, { status: 401 });
     }
 
-    const url = `${BACKEND_URL}/payments/${paymentId}/status`;
+    const url = `${urlapi.backendurlsapi.payment}/${paymentId}${urlapi.backendurlsapi.paymentstatus}`;
     console.log('?? Calling backend:', url, body);
 
     const response = await fetch(url, {
