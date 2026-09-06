@@ -64,6 +64,97 @@ const CalendarManagementTab: React.FC = () => {
     targetClass: ''
   });
 
+  // Normalise un texte pour la comparaison : enleve les accents, met en
+  // minuscules et retire les espaces superflus. Cela evite les faux
+  // negatifs si le titre et le libelle different par la casse ou les accents
+  // (ex: "1ere" avec ou sans accent, "Groupe" vs "groupe").
+  const normalizeText = (text: string): string =>
+    text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+
+  // Retrouve la cle de classe (celle utilisee comme value dans le <select>)
+  // a partir d'un texte quelconque : soit le texte EST deja une cle valide,
+  // soit c'est un libelle complet (ex: "Terminale groupe 1 (Lundi 18:30-20:30)"
+  // comme le stocke le backend), soit un titre de seance qui contient ce libelle.
+  const getClassKeyFromText = (text: string): string => {
+    if (!text) return '';
+
+    const normalizedText = normalizeText(text);
+
+    for (const cls of classes) {
+      const label = getClassLabel(cls);
+      if (!label) continue;
+
+      const normalizedLabel = normalizeText(label);
+      // Correspondance complete (avec horaire) ou juste le nom du groupe (avant la parenthese)
+      const groupNameOnly = normalizedLabel.split(' (')[0];
+
+      if (
+        normalizeText(cls) === normalizedText ||
+        normalizedText.includes(normalizedLabel) ||
+        normalizedText.includes(groupNameOnly)
+      ) {
+        return cls;
+      }
+    }
+
+    return '';
+  };
+
+  // Retrouve la classe cible effective d'une seance, quelle que soit la
+  // forme sous laquelle le backend l'a enregistree :
+  // 1) target_class est deja une cle valide du <select> -> on la garde
+  // 2) target_class contient le libelle complet (ce que fait actuellement
+  //    le backend, ex: "Terminale groupe 1 (Lundi 18:30-20:30)") -> on la
+  //    convertit vers la cle correspondante
+  // 3) target_class est vide -> on la deduit du titre de la seance
+  const getEffectiveTargetClass = (session: { target_class?: string; title: string }): string => {
+    if (session.target_class && classes.includes(session.target_class)) {
+      return session.target_class;
+    }
+
+    return (
+      getClassKeyFromText(session.target_class || '') ||
+      getClassKeyFromText(session.title)
+    );
+  };
+
+  // Palette de couleurs distinctes utilisee pour differencier chaque groupe/classe
+  const GROUP_COLOR_PALETTE = [
+    'bg-blue-500',
+    'bg-green-500',
+    'bg-purple-500',
+    'bg-orange-500',
+    'bg-pink-500',
+    'bg-teal-500',
+    'bg-indigo-500',
+    'bg-amber-500',
+    'bg-cyan-500',
+    'bg-lime-600',
+    'bg-fuchsia-500',
+    'bg-rose-500'
+  ];
+
+  const hashString = (str: string): number => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i);
+      hash |= 0;
+    }
+    return Math.abs(hash);
+  };
+
+  // Attribue une couleur stable a chaque groupe/classe (et non plus a la matiere),
+  // afin que "Terminale groupe 1", "Terminale groupe 2", etc. soient visuellement distincts.
+  const getGroupColor = (session: { target_class?: string; title: string; subject?: string }): string => {
+    const groupKey = getEffectiveTargetClass(session) || session.subject || 'default';
+    const index = hashString(groupKey) % GROUP_COLOR_PALETTE.length;
+    return GROUP_COLOR_PALETTE[index];
+  };
+
   // Charger les seances d'etude et les rendez-vous
   useEffect(() => {
     loadStudySessions();
@@ -338,28 +429,6 @@ const CalendarManagementTab: React.FC = () => {
     return [...sessions, ...appointmentItems];
   };
 
-  const getSessionColor = (subject: string) => {
-    switch (subject.toLowerCase()) {
-      case 'mathematiques':
-      case 'maths':
-        return 'bg-blue-500';
-      case 'physique':
-        return 'bg-green-500';
-      case 'chimie':
-        return 'bg-purple-500';
-      case 'francais':
-        return 'bg-orange-500';
-      case 'anglais':
-        return 'bg-red-500';
-      case 'histoire':
-        return 'bg-yellow-500';
-      case 'geographie':
-        return 'bg-indigo-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-
   const navigateMonth = (direction: 'prev' | 'next') => {
     setCurrentDate(prev => {
       const newDate = new Date(prev);
@@ -428,7 +497,9 @@ const CalendarManagementTab: React.FC = () => {
       startTime: session.start_time,
       endTime: session.end_time,
       subject: session.subject,
-      targetClass: session.target_class || ''
+      // Si la classe cible n'est pas enregistree, on la deduit du titre
+      // de la seance au lieu de laisser le champ vide.
+      targetClass: getEffectiveTargetClass(session)
     });
     setShowSessionModal(true);
   };
@@ -564,7 +635,7 @@ const CalendarManagementTab: React.FC = () => {
         <div className="grid grid-cols-7 gap-1">
           {days.map((day, index) => {
             if (!day) {
-              return <div key={index} className="h-32 border border-white/10 rounded-lg"></div>;
+              return <div key={index} className="min-h-[8rem] border border-white/10 rounded-lg"></div>;
             }
 
             const dayItems = getAllItemsForDate(day);
@@ -575,7 +646,7 @@ const CalendarManagementTab: React.FC = () => {
               <div
                 key={day.toISOString()}
                 onClick={() => handleDateClick(day)}
-                className={`h-32 p-2 rounded-lg cursor-pointer transition-all duration-200 border ${
+                className={`min-h-[8rem] p-2 rounded-lg cursor-pointer transition-all duration-200 border ${
                   isCurrentDay
                     ? 'bg-blue-600 text-white border-blue-400 shadow-lg'
                     : isSelectedDay
@@ -602,9 +673,9 @@ const CalendarManagementTab: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Zone des evenements */}
-                  <div className="pt-8 space-y-1 overflow-hidden">
-                    {dayItems.slice(0, 2).map((item: any) => (
+                  {/* Zone des evenements : on affiche tout, sans "+n autres" */}
+                  <div className="pt-8 space-y-1">
+                    {dayItems.map((item: any) => (
                       <div
                         key={item.id}
                         onClick={(e) => {
@@ -619,17 +690,12 @@ const CalendarManagementTab: React.FC = () => {
                         className={`text-xs p-1 rounded truncate ${
                           item.isAppointment
                             ? 'bg-red-600'
-                            : getSessionColor(item.subject)
+                            : getGroupColor(item)
                         } text-white hover:opacity-80 transition-opacity`}
                       >
                         {item.isAppointment ? 'RDV: ' : ''}{item.title}
                       </div>
                     ))}
-                    {dayItems.length > 2 && (
-                      <div className="text-xs text-white/70">
-                        +{dayItems.length - 2} autres
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -808,9 +874,9 @@ const CalendarManagementTab: React.FC = () => {
                 <span className="text-lg font-semibold text-gray-700">
                   {selectedSession.subject}
                 </span>
-                {selectedSession.target_class && (
+                {getEffectiveTargetClass(selectedSession) && (
                   <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                    {selectedSession.target_class}
+                    {getClassLabel(getEffectiveTargetClass(selectedSession)) || getEffectiveTargetClass(selectedSession)}
                   </span>
                 )}
               </div>

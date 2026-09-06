@@ -126,27 +126,31 @@ const CalendarTab: React.FC = () => {
       console.error('Erreur lors du chargement de la classe:', error);
     }
   };
-
-  const loadStudySessions = async () => {
-    try {
-      const response = await fetch('/api/study-sessions');
-      const data = await response.json();
-      
-      if (response.ok) {
-        // Filtrer les séances pour ne montrer que celles de la classe de l'étudiant
-        const filteredSessions = data.filter((session: StudySession) => {
-          // Si la séance n'a pas de classe cible, la montrer à tous
-          if (!session.target_class) return true;
-          // Sinon, ne la montrer que si elle correspond à la classe de l'étudiant
-          return session.target_class === studentClass;
-        });
-        
-        setStudySessions(filteredSessions);
-      }
-    } catch (error) {
-      console.error('Erreur lors du chargement des séances d\'étude:', error);
+  
+const loadStudySessions = async () => {
+  try {
+    const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
+    const params = new URLSearchParams();
+    if (studentClass) {
+      params.append('targetClass', studentClass);
     }
-  };
+    const response = await fetch(`/api/study-sessions?${params.toString()}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    const data = await response.json();
+
+    if (response.ok) {
+      setStudySessions(data);
+    } else {
+      showNotification('error', 'Erreur lors du chargement des seances');
+    }
+  } catch (error) {
+    showNotification('error', 'Erreur lors du chargement des seances');
+  }
+};
 
   const showNotification = (type: 'success' | 'error' | 'info', message: string) => {
     setNotifications({ type, message });

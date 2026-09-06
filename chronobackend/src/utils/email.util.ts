@@ -1,4 +1,4 @@
-// src/utils/email.util.ts (VERSION CORRIG�E)
+// src/utils/email.util.ts
 import * as nodemailer from 'nodemailer';
 
 const transporter = nodemailer.createTransport({
@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// V�rifiez la configuration SMTP au d�marrage
+// Verifiez la configuration SMTP au demarrage
 transporter.verify((error, success) => {
   if (error) {
     console.error('Erreur configuration SMTP:', error);
@@ -27,29 +27,29 @@ export async function sendVerificationEmail(to: string, token: string) {
     const info = await transporter.sendMail({
       from: `"Chrono Carto" <${process.env.EMAIL_USER}>`,
       to,
-      subject: 'V�rifiez votre adresse email pour Chrono-Carto',
+      subject: 'Vérifiez votre adresse email pour Chrono-Carto',
       html: `
         <!DOCTYPE html>
         <html lang="fr">
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>V�rification d'email - Chrono Carto</title>
+          <title>Vérification d'email - Chrono Carto</title>
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; text-align: center;">
             <h1 style="color: #2563eb; margin-bottom: 30px;">Bienvenue sur Chrono-Carto ! ??</h1>
             
             <p style="font-size: 16px; margin-bottom: 30px;">
-              Merci de vous �tre inscrit sur notre plateforme d'Histoire-G�ographie.
-              Pour finaliser votre inscription, veuillez v�rifier votre adresse email.
+              Merci de vous etre inscrit sur notre plateforme d'Histoire-Geographie.
+              Pour finaliser votre inscription, veuillez vérifier votre adresse email.
             </p>
             
             <div style="margin: 40px 0;">
               <a href="${url}" 
                  style="display: inline-block; background: #2563eb; color: white; padding: 15px 30px; 
                         text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                ? V�rifier mon email
+                ? Verifier mon email
               </a>
             </div>
             
@@ -61,7 +61,7 @@ export async function sendVerificationEmail(to: string, token: string) {
             <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
             
             <p style="font-size: 12px; color: #888;">
-              Si vous n'avez pas cr�� de compte sur Chrono-Carto, veuillez ignorer cet email.
+              Si vous n'avez pas créé de compte sur Chrono-Carto, veuillez ignorer cet email.
             </p>
           </div>
         </body>
@@ -69,19 +69,19 @@ export async function sendVerificationEmail(to: string, token: string) {
       `,
     });
     
-    console.log(`? Email de v�rification envoy� � ${to}`);
-    console.log(`?? URL de v�rification: ${url}`);
+    console.log(`? Email de vérification envoyé à ${to}`);
+    console.log(`?? URL de vérification: ${url}`);
     console.log(`?? Message ID: ${info.messageId}`);
     
     return info;
   } catch (error) {
-    console.error(`? Erreur d'envoi email de v�rification � ${to}:`, error);
+    console.error(`? Erreur d'envoi email de vérification à ${to}:`, error);
     throw error;
   }
 }
 
 export async function sendPasswordResetEmail(to: string, token: string) {
-  // Utiliser le backend pour d�poser un cookie + redirection instantan�e
+  // Utiliser le backend pour déposer un cookie + redirection instantanée
   const backendUrl = process.env.BACKEND_URL!;
   const url = `${backendUrl}/auth/reset-password-link?t=${token}`;
   
@@ -89,21 +89,21 @@ export async function sendPasswordResetEmail(to: string, token: string) {
     const info = await transporter.sendMail({
       from: `"Chrono Carto" <${process.env.EMAIL_USER}>`,
       to,
-      subject: 'R�initialisation de votre mot de passe Chrono-Carto',
+      subject: 'Réinitialisation de votre mot de passe Chrono-Carto',
       html: `
         <!DOCTYPE html>
         <html lang="fr">
         <head>
           <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>R�initialisation mot de passe - Chrono Carto</title>
+          <title>Réinitialisation mot de passe - Chrono Carto</title>
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; text-align: center;">
-            <h1 style="color: #dc2626; margin-bottom: 30px;">?? R�initialisation de mot de passe</h1>
+            <h1 style="color: #dc2626; margin-bottom: 30px;">?? Réinitialisation de mot de passe</h1>
             
             <p style="font-size: 16px; margin-bottom: 30px;">
-              Vous avez demand� � r�initialiser votre mot de passe sur Chrono-Carto.
+              Vous avez demandé à réinitialiser votre mot de passe sur Chrono-Carto.
               Cliquez sur le bouton ci-dessous pour continuer.
             </p>
             
@@ -111,7 +111,7 @@ export async function sendPasswordResetEmail(to: string, token: string) {
               <a href="${url}" 
                  style="display: inline-block; background: #dc2626; color: white; padding: 15px 30px; 
                         text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
-                ?? R�initialiser mon mot de passe
+                ?? Réinitialiser mon mot de passe
               </a>
             </div>
             
@@ -127,8 +127,8 @@ export async function sendPasswordResetEmail(to: string, token: string) {
             <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
             
             <p style="font-size: 12px; color: #888;">
-              Si vous n'avez pas demand� de r�initialisation, veuillez ignorer cet email.<br>
-              Votre mot de passe restera inchang�.
+              Si vous n'avez pas demandé de réinitialisation, veuillez ignorer cet email.<br>
+              Votre mot de passe restera inchangé.
             </p>
           </div>
         </body>

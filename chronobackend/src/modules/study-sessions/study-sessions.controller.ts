@@ -29,8 +29,9 @@ export class StudySessionsController {
   findAll(
     @Query('date') date?: string,
     @Query('subject') subject?: string,
+    @Query('targetClass') targetClass?: string,
   ) {
-    return this.studySessionsService.findAll(date, subject);
+    return this.studySessionsService.findAll(date, subject, targetClass);
   }
 
   @Get(':id')

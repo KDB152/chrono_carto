@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import urlapi from '@/config/url'
+import urlapi from '@/config/url';
+import { isSameOrAliasClass } from '@/constants/classes';
 
 
 export async function GET(
@@ -38,23 +39,23 @@ export async function GET(
     
     if (!childResponse.ok) {
       return NextResponse.json(
-        { error: 'Enfant non trouv�' },
+        { error: 'Enfant non trouv' },
         { status: 404 }
       );
     }
     
-    // Filtrer les s�ances d'�tude pour la classe de l'enfant
+    // Filtrer les séances d'étude pour la classe de l'enfant
     const filteredSessions = Array.isArray(studySessionsData) 
       ? studySessionsData.filter((session: any) => {
-          // Si la s�ance n'a pas de classe cible, la montrer � tous
+          // Si la séance n'a pas de classe cible, la montrer à tous
           if (!session.target_class) return true;
-          // Sinon, ne la montrer que si elle correspond � la classe de l'enfant
-          return session.target_class === childData.class_level;
+          // Sinon, ne la montrer que si elle correspond à la classe de l'enfant
+          return !childData.class_level || isSameOrAliasClass(session.target_class, childData.class_level);
         })
       : [];
     
-    // Pour l'instant, on retourne seulement les s�ances d'�tude
-    // Plus tard, on pourra ajouter d'autres types d'�v�nements (examens, sorties, etc.)
+    // Pour l'instant, on retourne seulement les sances d'tude
+    // Plus tard, on pourra ajouter d'autres types d'vnements (examens, sorties, etc.)
     const calendarData = {
       child: {
         id: childData.id,

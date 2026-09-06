@@ -4,23 +4,31 @@ export const GROUP_FULL_MESSAGE =
   'Le groupe est saturé. Veuillez choisir un autre groupe par exemple.';
 
 export const AVAILABLE_CLASS_LEVELS = [
-  'Terminale groupe 1 (Lundi 18h30-20h30)',
-  'Terminale groupe 2 (Vendredi 16h30-18h30)',
-  'Terminale groupe 3 (Vendredi 18h30-20h30)',
-  'Terminale groupe 4 (Dimanche 08h00-10h00)',
-  '1ere groupe 1 (Jeudi 18h30-20h30)',
-  '1ere groupe 2 (Vendredi 14h00-16h00)',
-  '1ere groupe 3 (Dimanche 10h00-12h00)',
+  'Terminale groupe 1 (Lundi 18:30-20:30)',
+  'Terminale groupe 2 (Vendredi 16:30-18:30)',
+  'terminale groupe 3 (Vendredi 18:30-20:30)',
+  'Terminale groupe 4 (Dimanche 8:00-10:00)',
+  '1ere groupe 1 (Jeudi 18:30-20:30)',
+  '1ere groupe 2 (Vendredi 14:00-16:00)',
+  '1ere groupe 3 (Dimanche 10:00-12:00)',
 ];
 
 const LEGACY_CLASS_LEVELS: Record<string, string> = {
-  'Terminale groupe 1': 'Terminale groupe 1 (Lundi 18h30-20h30)',
-  'Terminale groupe 2': 'Terminale groupe 2 (Vendredi 16h30-18h30)',
-  'Terminale groupe 3': 'Terminale groupe 3 (Vendredi 18h30-20h30)',
-  'Terminale groupe 4': 'Terminale groupe 4 (Dimanche 08h00-10h00)',
-  '1ere groupe 1': '1ere groupe 1 (Jeudi 18h30-20h30)',
-  '1ere groupe 2': '1ere groupe 2 (Vendredi 14h00-16h00)',
-  '1ere groupe 3': '1ere groupe 3 (Dimanche 10h00-12h00)',
+  'Terminale groupe 1': 'Terminale groupe 1 (Lundi 18:30-20:30)',
+  'Terminale groupe 2': 'Terminale groupe 2 (Vendredi 16:30-18:30)',
+  'Terminale groupe 3': 'terminale groupe 3 (Vendredi 18:30-20:30)',
+  'terminale groupe 3': 'terminale groupe 3 (Vendredi 18:30-20:30)',
+  'Terminale groupe 4': 'Terminale groupe 4 (Dimanche 8:00-10:00)',
+  '1ere groupe 1': '1ere groupe 1 (Jeudi 18:30-20:30)',
+  '1ere groupe 2': '1ere groupe 2 (Vendredi 14:00-16:00)',
+  '1ere groupe 3': '1ere groupe 3 (Dimanche 10:00-12:00)',
+  'Terminale groupe 1 (Lundi 18h30-20h30)': 'Terminale groupe 1 (Lundi 18:30-20:30)',
+  'Terminale groupe 2 (Vendredi 16h30-18h30)': 'Terminale groupe 2 (Vendredi 16:30-18:30)',
+  'Terminale groupe 3 (Vendredi 18h30-20h30)': 'terminale groupe 3 (Vendredi 18:30-20:30)',
+  'Terminale groupe 4 (Dimanche 08h00-10h00)': 'Terminale groupe 4 (Dimanche 8:00-10:00)',
+  '1ere groupe 1 (Jeudi 18h30-20h30)': '1ere groupe 1 (Jeudi 18:30-20:30)',
+  '1ere groupe 2 (Vendredi 14h00-16h00)': '1ere groupe 2 (Vendredi 14:00-16:00)',
+  '1ere groupe 3 (Dimanche 10h00-12h00)': '1ere groupe 3 (Dimanche 10:00-12:00)',
 };
 
 export const CLASS_LABELS: Record<string, string> = {
