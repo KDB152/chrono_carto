@@ -4,14 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ToastProvider } from '@/components/ui/toast';
 import { Mail, Lock, User, Eye, EyeOff, UserPlus, Globe, MapPin, BookOpen, CheckCircle, AlertCircle, GraduationCap, Phone, Calendar, Baby, ArrowRight, Shield, Zap, Users, Star, Award } from 'lucide-react';
-import urlapi from '@/config/url'
+
 // Export viewport configuration
 export const viewport = {
   themeColor: '#F59E0B',
   viewport: 'width=device-width, initial-scale=1',
 };
 
-import { AVAILABLE_CLASSES } from '@/constants/classes';
+import { AVAILABLE_CLASSES, getClassLabel, GROUP_FULL_MESSAGE } from '@/constants/classes';
 
 const RegisterPage: React.FC = () => {
   const router = useRouter();
@@ -58,31 +58,32 @@ const RegisterPage: React.FC = () => {
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [successMessage, setSuccessMessage] = useState('');
   const [isVisible, setIsVisible] = useState(false);
+  const [fullGroups, setFullGroups] = useState<string[]>([]);
 
   const quotes = [
-    { text: "L'éducation est l'arme la plus puissante qu'on puisse utiliser pour changer le monde", author: "Nelson Mandela" },
-    { text: "Celui qui ne connaît pas l'histoire est condamné à la répéter", author: "George Santayana" },
-    { text: "La géographie, c'est ce qui reste quand on a tout oublié", author: "Paul Vidal de La Blache" }
+    { text: "L'education est l'arme la plus puissante qu'on puisse utiliser pour changer le monde", author: "Nelson Mandela" },
+    { text: "Celui qui ne connait pas l'histoire est condamne a la repeter", author: "George Santayana" },
+    { text: "La geographie, c'est ce qui reste quand on a tout oublie", author: "Paul Vidal de La Blache" }
   ];
 
   const benefits = [
     { icon: Globe, title: "Quiz Interactifs", description: "Testez vos connaissances" },
-    { icon: Users, title: "Messagerie", description: "Échangez avec vos enseignants" },
-    { icon: Calendar, title: "Gestion des Séances", description: "Organisez vos cours" },
-    { icon: Shield, title: "Sécurité RGPD", description: "Données protégées" }
+    { icon: Users, title: "Messagerie", description: "Echangez avec vos enseignants" },
+    { icon: Calendar, title: "Gestion des Seances", description: "Organisez vos cours" },
+    { icon: Shield, title: "Securite RGPD", description: "Donnees protegees" }
   ];
 
   // Calculer la force du mot de passe
   useEffect(() => {
     const password = formData.password;
     let strength = 0;
-    
+
     if (password.length >= 8) strength += 1;
     if (/[A-Z]/.test(password)) strength += 1;
     if (/[a-z]/.test(password)) strength += 1;
     if (/[0-9]/.test(password)) strength += 1;
     if (/[^A-Za-z0-9]/.test(password)) strength += 1;
-    
+
     setPasswordStrength(strength);
   }, [formData.password]);
 
@@ -91,6 +92,22 @@ const RegisterPage: React.FC = () => {
     const quoteInterval = setInterval(() => {
       setCurrentQuote((prev) => (prev + 1) % quotes.length);
     }, 4000);
+
+    const loadOccupancy = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/auth/group-occupancy`);
+        if (!response.ok) return;
+        const data = await response.json();
+        const saturated = (data.groups || [])
+          .filter((group: { classLevel: string; isFull: boolean }) => group.isFull)
+          .map((group: { classLevel: string }) => group.classLevel);
+        setFullGroups(saturated);
+      } catch {
+        // L'inscription reste possible ; le backend bloquera un groupe sature.
+      }
+    };
+
+    loadOccupancy();
 
     return () => clearInterval(quoteInterval);
   }, [quotes.length]);
@@ -104,7 +121,7 @@ const RegisterPage: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.firstName.trim()) {
-      newErrors.firstName = 'Le prénom est obligatoire';
+      newErrors.firstName = 'Le prenom est obligatoire';
     }
 
     if (!formData.lastName.trim()) {
@@ -112,15 +129,15 @@ const RegisterPage: React.FC = () => {
     }
 
     if (!formData.email) {
-      newErrors.email = 'L\'adresse email est obligatoire';
+      newErrors.email = "L'adresse email est obligatoire";
     } else if (!validateEmail(formData.email)) {
-      newErrors.email = 'L\'adresse email n\'est pas valide';
+      newErrors.email = "L'adresse email n'est pas valide";
     }
 
     if (!formData.password) {
       newErrors.password = 'Le mot de passe est obligatoire';
     } else if (formData.password.length < 8) {
-      newErrors.password = 'Le mot de passe doit contenir au moins 8 caractères';
+      newErrors.password = 'Le mot de passe doit contenir au moins 8 caracteres';
     }
 
     if (!formData.confirmPassword) {
@@ -129,7 +146,7 @@ const RegisterPage: React.FC = () => {
       newErrors.confirmPassword = 'Les mots de passe ne correspondent pas';
     }
 
-    // Validation spécifique aux étudiants
+    // Validation specifique aux etudiants
     if (formData.userType === 'student') {
       if (!formData.studentBirthDate) {
         newErrors.studentBirthDate = 'La date de naissance est obligatoire';
@@ -137,61 +154,65 @@ const RegisterPage: React.FC = () => {
       if (!formData.studentClass) {
         newErrors.studentClass = 'La classe est obligatoire';
       } else if (!AVAILABLE_CLASSES.includes(formData.studentClass)) {
-        newErrors.studentClass = 'Veuillez sélectionner une classe valide';
+        newErrors.studentClass = 'Veuillez selectionner une classe valide';
+      } else if (fullGroups.includes(formData.studentClass)) {
+        newErrors.studentClass = GROUP_FULL_MESSAGE;
       }
-      // Le téléphone parent est obligatoire pour les étudiants
+      // Le telephone parent est obligatoire pour les etudiants
       if (!formData.parentPhone || !formData.parentPhone.trim()) {
-        newErrors.parentPhone = 'Le numéro de téléphone du parent est obligatoire';
+        newErrors.parentPhone = 'Le numero de telephone du parent est obligatoire';
       } else if (!/^[0-9+\-\s()]+$/.test(formData.parentPhone)) {
-        newErrors.parentPhone = 'Veuillez entrer un numéro de téléphone valide pour le parent';
+        newErrors.parentPhone = 'Veuillez entrer un numero de telephone valide pour le parent';
       }
-      
-      // Validation optionnelle des autres données parent
+
+      // Validation optionnelle des autres donnees parent
       if (formData.parentEmail && !validateEmail(formData.parentEmail)) {
         newErrors.parentEmail = 'Veuillez entrer une adresse email valide pour le parent';
       }
       if (formData.parentPassword && formData.parentPassword.length < 8) {
-        newErrors.parentPassword = 'Le mot de passe du parent doit contenir au moins 8 caractères';
+        newErrors.parentPassword = 'Le mot de passe du parent doit contenir au moins 8 caracteres';
       }
       if (formData.parentPassword && formData.parentConfirmPassword && formData.parentPassword !== formData.parentConfirmPassword) {
         newErrors.parentConfirmPassword = 'Les mots de passe du parent ne correspondent pas';
       }
     }
 
-    // Validation spécifique aux parents
+    // Validation specifique aux parents
     if (formData.userType === 'parent') {
-      // Validation obligatoire des données enfant
+      // Validation obligatoire des donnees enfant
       if (!formData.childFirstName || !formData.childFirstName.trim()) {
-        newErrors.childFirstName = 'Le prénom de l\'enfant est obligatoire';
+        newErrors.childFirstName = "Le prenom de l'enfant est obligatoire";
       }
       if (!formData.childLastName || !formData.childLastName.trim()) {
-        newErrors.childLastName = 'Le nom de l\'enfant est obligatoire';
+        newErrors.childLastName = "Le nom de l'enfant est obligatoire";
       }
       if (!formData.childPhone || !formData.childPhone.trim()) {
-        newErrors.childPhone = 'Le numéro de téléphone de l\'enfant est obligatoire';
+        newErrors.childPhone = "Le numero de telephone de l'enfant est obligatoire";
       } else if (!/^[0-9+\-\s()]+$/.test(formData.childPhone)) {
-        newErrors.childPhone = 'Veuillez entrer un numéro de téléphone valide pour l\'enfant';
+        newErrors.childPhone = "Veuillez entrer un numero de telephone valide pour l'enfant";
       }
       if (!formData.childClass || !formData.childClass.trim()) {
-        newErrors.childClass = 'La classe de l\'enfant est obligatoire';
+        newErrors.childClass = "La classe de l'enfant est obligatoire";
       } else if (!AVAILABLE_CLASSES.includes(formData.childClass)) {
-        newErrors.childClass = 'Veuillez sélectionner une classe valide pour l\'enfant';
+        newErrors.childClass = "Veuillez selectionner une classe valide pour l'enfant";
+      } else if (fullGroups.includes(formData.childClass)) {
+        newErrors.childClass = GROUP_FULL_MESSAGE;
       }
-      
-      // Validation optionnelle des autres données enfant
+
+      // Validation optionnelle des autres donnees enfant
       if (formData.childEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.childEmail)) {
-        newErrors.childEmail = 'Veuillez entrer un email valide pour l\'enfant';
+        newErrors.childEmail = "Veuillez entrer un email valide pour l'enfant";
       }
       if (formData.childPassword && formData.childPassword.length < 8) {
-        newErrors.childPassword = 'Le mot de passe de l\'enfant doit contenir au moins 8 caractères';
+        newErrors.childPassword = "Le mot de passe de l'enfant doit contenir au moins 8 caracteres";
       }
       if (formData.childPassword && formData.childConfirmPassword && formData.childPassword !== formData.childConfirmPassword) {
-        newErrors.childConfirmPassword = 'Les mots de passe de l\'enfant ne correspondent pas';
+        newErrors.childConfirmPassword = "Les mots de passe de l'enfant ne correspondent pas";
       }
     }
 
     if (!formData.acceptTerms) {
-      newErrors.acceptTerms = 'Vous devez accepter les conditions d\'utilisation';
+      newErrors.acceptTerms = "Vous devez accepter les conditions d'utilisation";
     }
 
     return newErrors;
@@ -200,7 +221,7 @@ const RegisterPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors = validateForm();
-    
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
@@ -225,7 +246,7 @@ const RegisterPage: React.FC = () => {
       if (formData.userType === 'student') {
         if (formData.studentBirthDate) requestData.studentBirthDate = formData.studentBirthDate;
         if (formData.studentClass) requestData.studentClass = formData.studentClass;
-        
+
         // Parent contact fields (only include if not empty)
         if (formData.parentFirstName?.trim()) requestData.parentFirstName = formData.parentFirstName;
         if (formData.parentLastName?.trim()) requestData.parentLastName = formData.parentLastName;
@@ -247,7 +268,7 @@ const RegisterPage: React.FC = () => {
         if (formData.childPhone?.trim()) requestData.childPhone = formData.childPhone;
       }
 
-      const response = await fetch(`${urlapi.urlsapi.register}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestData),
@@ -255,10 +276,11 @@ const RegisterPage: React.FC = () => {
 
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || "Impossible de créer votre compte. Veuillez réessayer.");
+        const backendMessage = Array.isArray(data.message) ? data.message[0] : data.message;
+        throw new Error(backendMessage || "Impossible de creer votre compte. Veuillez reessayer.");
       }
 
-      // Rediriger vers la page de vérification d'email après inscription réussie
+      // Rediriger vers la page de verification d'email apres inscription reussie
       localStorage.setItem('pendingVerificationEmail', formData.email);
       router.push(`/verify-email?email=${encodeURIComponent(formData.email)}`);
     } catch (error) {
@@ -271,13 +293,19 @@ const RegisterPage: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    
+
+    if ((name === 'studentClass' || name === 'childClass') && fullGroups.includes(value)) {
+      setFormData(prev => ({ ...prev, [name]: value }));
+      setErrors(prev => ({ ...prev, [name]: GROUP_FULL_MESSAGE }));
+      return;
+    }
+
     setFormData(prev => {
       const newData = {
         ...prev,
         [name]: type === 'checkbox' ? checked : value
       };
-      
+
       // Synchroniser automatiquement les mots de passe
       if (name === 'password') {
         // Si c'est le mot de passe principal, le copier vers parent et enfant
@@ -289,11 +317,11 @@ const RegisterPage: React.FC = () => {
           newData.childConfirmPassword = value;
         }
       }
-      
+
       return newData;
     });
-    
-    // Effacer l'erreur quand l'utilisateur commence à taper
+
+    // Effacer l'erreur quand l'utilisateur commence a taper
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -302,11 +330,11 @@ const RegisterPage: React.FC = () => {
   const getPasswordStrengthText = () => {
     switch (passwordStrength) {
       case 0:
-      case 1: return { text: 'Très faible', color: 'text-red-400' };
+      case 1: return { text: 'Tres faible', color: 'text-red-400' };
       case 2: return { text: 'Faible', color: 'text-orange-400' };
       case 3: return { text: 'Moyen', color: 'text-yellow-400' };
       case 4: return { text: 'Fort', color: 'text-green-400' };
-      case 5: return { text: 'Très fort', color: 'text-emerald-400' };
+      case 5: return { text: 'Tres fort', color: 'text-emerald-400' };
       default: return { text: '', color: '' };
     }
   };
@@ -326,7 +354,7 @@ const RegisterPage: React.FC = () => {
   return (
     <ToastProvider>
       <div className="min-h-screen-mobile relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 safe-top safe-bottom">
-        {/* Fond animé et éléments historiques */}
+        {/* Fond anime et elements historiques */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-10 left-10 w-32 h-32 bg-gradient-to-br from-amber-200/20 to-yellow-300/20 rounded-full animate-pulse blur-xl"></div>
           <div className="absolute top-1/3 right-1/4 w-24 h-24 bg-gradient-to-br from-emerald-200/20 to-green-300/20 rounded-full animate-bounce blur-lg"></div>
@@ -356,7 +384,7 @@ const RegisterPage: React.FC = () => {
                   <img src="/images/chrono_carto_logo.png" alt="Chrono-Carto" className="w-32 h-32 mr-6" />
                   <div>
                     <h1 className="text-3xl font-bold text-white">Chrono-Carto</h1>
-                    <p className="text-white/60">Plateforme éducative nouvelle génération</p>
+                    <p className="text-white/60">Plateforme educative nouvelle generation</p>
                   </div>
                 </div>
               </div>
@@ -367,7 +395,7 @@ const RegisterPage: React.FC = () => {
                   <span className="bg-gradient-to-r from-amber-400 to-orange-500 bg-clip-text text-transparent"> d'apprentissage</span>
                 </h2>
                 <p className="text-xl text-white/80 mb-8 leading-relaxed">
-                  Créez votre compte et accédez à des ressources pédagogiques innovantes, entièrement gratuites
+                  Creez votre compte et accedez a des ressources pedagogiques innovantes, entierement gratuites
                 </p>
               </div>
 
@@ -378,7 +406,7 @@ const RegisterPage: React.FC = () => {
                     "{quotes[currentQuote].text}"
                   </div>
                   <div className="text-amber-300 font-medium">
-                    — {quotes[currentQuote].author}
+                    &mdash; {quotes[currentQuote].author}
                   </div>
                 </div>
               </div>
@@ -406,7 +434,7 @@ const RegisterPage: React.FC = () => {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-amber-300 mb-1">3</div>
-                  <div className="text-white/60 text-sm">Matières</div>
+                  <div className="text-white/60 text-sm">Matieres</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-amber-300 mb-1">24/7</div>
@@ -424,14 +452,14 @@ const RegisterPage: React.FC = () => {
                   <img src="/images/chrono_carto_logo.png" alt="Chrono-Carto" className="w-32 h-32" />
                 </div>
                 <h2 className="text-4xl font-bold text-white mb-3">Inscription</h2>
-                <p className="text-blue-200 text-lg">Créez votre compte d'apprentissage</p>
+                <p className="text-blue-200 text-lg">Creez votre compte d'apprentissage</p>
               </div>
 
               <form
                 onSubmit={handleSubmit}
                 className="bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 shadow-2xl space-y-6"
               >
-                {/* Messages d'erreur et de succès */}
+                {/* Messages d'erreur et de succes */}
                 {errors.global && (
                   <div className="p-4 bg-red-500/20 border border-red-500/30 rounded-xl mb-6">
                     <p className="text-sm text-red-300 flex items-center justify-center">
@@ -449,7 +477,7 @@ const RegisterPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Sélection du type d'utilisateur */}
+                {/* Selection du type d'utilisateur */}
                 <div>
                   <label className="block text-sm font-medium text-white/90 mb-3">
                     Je suis :
@@ -465,7 +493,7 @@ const RegisterPage: React.FC = () => {
                       }`}
                     >
                       <GraduationCap className={`w-5 h-5 ${formData.userType === 'student' ? 'text-amber-300' : 'group-hover:text-white'} transition-colors`} />
-                      <span className="text-sm font-medium">Étudiant</span>
+                      <span className="text-sm font-medium">Etudiant</span>
                     </button>
                     <button
                       type="button"
@@ -486,13 +514,13 @@ const RegisterPage: React.FC = () => {
                 <div className="bg-white/5 rounded-2xl p-6 border border-white/10 hover:bg-white/10 transition-all duration-300">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                     <User className="w-5 h-5 mr-2 text-amber-300" />
-                    {formData.userType === 'student' ? 'Informations personnelles' : 'Informations personnelles'}
+                    Informations personnelles
                   </h3>
-                  
-                  {/* Nom et prénom */}
+
+                  {/* Nom et prenom */}
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-sm font-medium text-white/90 mb-3">Prénom</label>
+                      <label className="block text-sm font-medium text-white/90 mb-3">Prenom</label>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                           <User className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -505,7 +533,7 @@ const RegisterPage: React.FC = () => {
                           className={`w-full pl-12 pr-4 py-4 bg-white/10 border rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm hover:bg-white/15 ${
                             errors.firstName ? 'border-red-400' : 'border-white/20'
                           }`}
-                          placeholder="Votre prénom"
+                          placeholder="Votre prenom"
                           required
                         />
                       </div>
@@ -535,7 +563,7 @@ const RegisterPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Email et téléphone */}
+                  {/* Email et telephone */}
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-sm font-medium text-white/90 mb-3">Adresse email</label>
@@ -561,7 +589,7 @@ const RegisterPage: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-white/90 mb-3">Numéro de téléphone</label>
+                      <label className="block text-sm font-medium text-white/90 mb-3">Numero de telephone</label>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                           <Phone className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -574,7 +602,7 @@ const RegisterPage: React.FC = () => {
                           className={`w-full pl-12 pr-4 py-4 bg-white/10 border rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm ${
                             errors.phone ? 'border-red-400' : 'border-white/20'
                           }`}
-                          placeholder="Votre numéro de téléphone"
+                          placeholder="Votre numero de telephone"
                           required
                         />
                       </div>
@@ -584,7 +612,7 @@ const RegisterPage: React.FC = () => {
                     </div>
                   </div>
 
-                                    {/* Champs spécifiques selon le type d'utilisateur */}
+                  {/* Champs specifiques selon le type d'utilisateur */}
                   {formData.userType === 'student' && (
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -626,12 +654,13 @@ const RegisterPage: React.FC = () => {
                           >
                             <option value="" className="bg-slate-800 text-white">Votre classe</option>
                             {AVAILABLE_CLASSES.map((classe) => (
-                              <option 
-                                key={classe} 
-                                value={classe} 
+                              <option
+                                key={classe}
+                                value={classe}
+                                disabled={fullGroups.includes(classe)}
                                 className="bg-slate-800 text-white"
                               >
-                                {classe}
+                                {getClassLabel(classe)}{fullGroups.includes(classe) ? ' - sature' : ''}
                               </option>
                             ))}
                           </select>
@@ -648,7 +677,7 @@ const RegisterPage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Mot de passe pour les étudiants */}
+                  {/* Mot de passe pour les etudiants */}
                   {formData.userType === 'student' && (
                     <>
                       <div className="mb-4">
@@ -805,19 +834,19 @@ const RegisterPage: React.FC = () => {
                       <span className="ml-2 text-sm font-normal text-red-400/80">(Obligatoire)</span>
                     </h3>
                     <p className="text-sm text-white/70 mb-4">
-                    Si votre enfant a déjà créé son compte, contactez l’administrateur et ne créez pas de compte parent. Sinon, créez un compte pour vous-même et pour votre enfant.
+                      Si votre enfant a deja cree son compte, contactez l'administrateur et ne creez pas de compte parent. Sinon, creez un compte pour vous-meme et pour votre enfant.
                     </p>
                     <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-3 mb-4">
                       <p className="text-sm text-blue-200">
-                        <strong>💡 Information :</strong> Les informations de votre enfant (nom, prénom, téléphone et classe) sont <strong className="text-red-300">obligatoires</strong>. 
-                        Un compte enfant sera créé automatiquement avec ces informations et le <strong className="text-amber-300">même mot de passe</strong> que le vôtre.
+                        <strong>Information :</strong> Les informations de votre enfant (nom, prenom, telephone et classe) sont <strong className="text-red-300">obligatoires</strong>.
+                        Un compte enfant sera cree automatiquement avec ces informations et le <strong className="text-amber-300">meme mot de passe</strong> que le votre.
                       </p>
                     </div>
-                    
-                    {/* Les champs enfant sont déjà dans la section précédente, on les déplace ici */}
+
+                    {/* Les champs enfant sont deja dans la section precedente, on les deplace ici */}
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        <label className="block text-sm font-medium text-white/90 mb-3">Prénom de l'enfant <span className="text-red-400/80 text-xs">(Obligatoire)</span></label>
+                        <label className="block text-sm font-medium text-white/90 mb-3">Prenom de l'enfant <span className="text-red-400/80 text-xs">(Obligatoire)</span></label>
                         <div className="relative group">
                           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <Baby className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -830,7 +859,7 @@ const RegisterPage: React.FC = () => {
                             className={`w-full pl-12 pr-4 py-4 bg-white/10 border rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm ${
                               errors.childFirstName ? 'border-red-400' : 'border-white/20'
                             }`}
-                            placeholder="Prénom de l'enfant (obligatoire)"
+                            placeholder="Prenom de l'enfant (obligatoire)"
                             required
                           />
                         </div>
@@ -860,7 +889,7 @@ const RegisterPage: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Email et téléphone de l'enfant */}
+                    {/* Email et telephone de l'enfant */}
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
                         <label className="block text-sm font-medium text-white/90 mb-3">Email de l'enfant <span className="text-amber-300/80 text-xs">(Optionnel)</span></label>
@@ -885,7 +914,7 @@ const RegisterPage: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-white/90 mb-3">Téléphone de l'enfant <span className="text-red-400/80 text-xs">(Obligatoire)</span></label>
+                        <label className="block text-sm font-medium text-white/90 mb-3">Telephone de l'enfant <span className="text-red-400/80 text-xs">(Obligatoire)</span></label>
                         <div className="relative group">
                           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <Phone className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -898,7 +927,7 @@ const RegisterPage: React.FC = () => {
                             className={`w-full pl-12 pr-4 py-4 bg-white/10 border rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm ${
                               errors.childPhone ? 'border-red-400' : 'border-white/20'
                             }`}
-                            placeholder="Numéro de téléphone de l'enfant (obligatoire)"
+                            placeholder="Numero de telephone de l'enfant (obligatoire)"
                             required
                           />
                         </div>
@@ -948,12 +977,13 @@ const RegisterPage: React.FC = () => {
                           >
                             <option value="" className="bg-slate-800 text-white">La classe de votre enfant (obligatoire)</option>
                             {AVAILABLE_CLASSES.map((classe) => (
-                              <option 
-                                key={classe} 
-                                value={classe} 
+                              <option
+                                key={classe}
+                                value={classe}
+                                disabled={fullGroups.includes(classe)}
                                 className="bg-slate-800 text-white"
                               >
-                                {classe}
+                                {getClassLabel(classe)}{fullGroups.includes(classe) ? ' - sature' : ''}
                               </option>
                             ))}
                           </select>
@@ -971,7 +1001,7 @@ const RegisterPage: React.FC = () => {
 
                     {/* Mot de passe de l'enfant */}
                     <div className="mb-4">
-                        <label className="block text-sm font-medium text-white/90 mb-3">Mot de passe de l'enfant <span className="text-amber-300/80 text-xs">(Optionnel)</span></label>
+                      <label className="block text-sm font-medium text-white/90 mb-3">Mot de passe de l'enfant <span className="text-amber-300/80 text-xs">(Optionnel)</span></label>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                           <Lock className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -1004,7 +1034,7 @@ const RegisterPage: React.FC = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-white/90 mb-3">Confirmer le mot de passe de l'enfant <span className="text-amber-300/80 text-xs">(Optionnel)</span></label>
+                      <label className="block text-sm font-medium text-white/90 mb-3">Confirmer le mot de passe de l'enfant <span className="text-amber-300/80 text-xs">(Optionnel)</span></label>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                           <Lock className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -1038,28 +1068,28 @@ const RegisterPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Informations des parents (pour les étudiants) */}
+                {/* Informations des parents (pour les etudiants) */}
                 {formData.userType === 'student' && (
                   <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
                     <h3 className="text-lg font-semibold text-white mb-2 flex items-center">
                       <User className="w-5 h-5 mr-2 text-amber-300" />
                       Informations des parents
-                      <span className="ml-2 text-sm font-normal text-red-400/80">(Téléphone obligatoire)</span>
+                      <span className="ml-2 text-sm font-normal text-red-400/80">(Telephone obligatoire)</span>
                     </h3>
                     <p className="text-sm text-white/70 mb-4">
-                    Si votre  a déjà créé son compte, contactez l’administrateur et ne créez pas de compte étudiant. Sinon, créez un compte pour vous-même et pour votre parent.
+                      Si votre parent a deja cree son compte, contactez l'administrateur et ne creez pas de compte etudiant. Sinon, creez un compte pour vous-meme et pour votre parent.
                     </p>
                     <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-3 mb-4">
                       <p className="text-sm text-blue-200">
-                        <strong>💡 Information :</strong> Le numéro de téléphone de votre parent est obligatoire. 
-                        Si vous ne renseignez pas les autres informations de vos parents, 
-                        un compte parent temporaire sera créé automatiquement avec le <strong className="text-amber-300">même mot de passe</strong> que le vôtre.
+                        <strong>Information :</strong> Le numero de telephone de votre parent est obligatoire.
+                        Si vous ne renseignez pas les autres informations de vos parents,
+                        un compte parent temporaire sera cree automatiquement avec le <strong className="text-amber-300">meme mot de passe</strong> que le votre.
                       </p>
                     </div>
-                    
+
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        <label className="block text-sm font-medium text-white/90 mb-3">Prénom du parent <span className="text-amber-300/80 text-xs">(Optionnel)</span></label>
+                        <label className="block text-sm font-medium text-white/90 mb-3">Prenom du parent <span className="text-amber-300/80 text-xs">(Optionnel)</span></label>
                         <div className="relative group">
                           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <User className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -1072,7 +1102,7 @@ const RegisterPage: React.FC = () => {
                             className={`w-full pl-12 pr-4 py-4 bg-white/10 border rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm ${
                               errors.parentFirstName ? 'border-red-400' : 'border-white/20'
                             }`}
-                            placeholder="Prénom du parent (optionnel)"
+                            placeholder="Prenom du parent (optionnel)"
                           />
                         </div>
                         {errors.parentFirstName && (
@@ -1124,7 +1154,7 @@ const RegisterPage: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-white/90 mb-3">Téléphone du parent <span className="text-red-400 text-xs">*</span></label>
+                        <label className="block text-sm font-medium text-white/90 mb-3">Telephone du parent <span className="text-red-400 text-xs">*</span></label>
                         <div className="relative group">
                           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <Phone className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -1137,7 +1167,7 @@ const RegisterPage: React.FC = () => {
                             className={`w-full pl-12 pr-4 py-4 bg-white/10 border rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm ${
                               errors.parentPhone ? 'border-red-400' : 'border-white/20'
                             }`}
-                            placeholder="Téléphone du parent (obligatoire)"
+                            placeholder="Telephone du parent (obligatoire)"
                             required
                           />
                         </div>
@@ -1149,7 +1179,7 @@ const RegisterPage: React.FC = () => {
 
                     {/* Mot de passe du parent */}
                     <div className="mb-4">
-                        <label className="block text-sm font-medium text-white/90 mb-3">Mot de passe du parent <span className="text-amber-300/80 text-xs">(Optionnel)</span></label>
+                      <label className="block text-sm font-medium text-white/90 mb-3">Mot de passe du parent <span className="text-amber-300/80 text-xs">(Optionnel)</span></label>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                           <Lock className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -1182,7 +1212,7 @@ const RegisterPage: React.FC = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-white/90 mb-3">Confirmer le mot de passe du parent <span className="text-amber-300/80 text-xs">(Optionnel)</span></label>
+                      <label className="block text-sm font-medium text-white/90 mb-3">Confirmer le mot de passe du parent <span className="text-amber-300/80 text-xs">(Optionnel)</span></label>
                       <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                           <Lock className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -1216,7 +1246,6 @@ const RegisterPage: React.FC = () => {
                   </div>
                 )}
 
-
                 {/* Conditions d'utilisation */}
                 <div className="flex items-center justify-between">
                   <label className="flex items-center">
@@ -1228,13 +1257,13 @@ const RegisterPage: React.FC = () => {
                       className="h-4 w-4 text-amber-400 focus:ring-amber-300 border-white/30 rounded bg-white/10"
                     />
                     <span className="ml-2 text-sm text-white/80">
-                          J'accepte les{' '}
-                          <a href="conditions-utilisation" className="text-amber-300 hover:text-amber-400">
-                            conditions d'utilisation
-                          </a>{' '}
-                          et la{' '}
-                          <a href="politique-confidentialite" className="text-amber-300 hover:text-amber-400">
-                            politique de confidentialité
+                      J'accepte les{' '}
+                      <a href="conditions-utilisation" className="text-amber-300 hover:text-amber-400">
+                        conditions d'utilisation
+                      </a>{' '}
+                      et la{' '}
+                      <a href="politique-confidentialite" className="text-amber-300 hover:text-amber-400">
+                        politique de confidentialite
                       </a>
                     </span>
                   </label>
@@ -1265,7 +1294,7 @@ const RegisterPage: React.FC = () => {
                 {/* Lien de connexion */}
                 <div className="text-center pt-4 border-t border-white/20">
                   <p className="text-white/80">
-                    Déjà un compte ?{' '}
+                    Deja un compte ?{' '}
                     <a href="/login" className="font-medium text-amber-300 hover:text-amber-200 transition-colors">
                       Se connecter
                     </a>
@@ -1275,14 +1304,14 @@ const RegisterPage: React.FC = () => {
 
               <div className="mt-6 text-center">
                 <p className="text-xs text-white/60">
-                  🔒 Connexion sécurisée • Données protégées RGPD
+                  Connexion securisee - Donnees protegees RGPD
                 </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Particules flottantes améliorées */}
+        {/* Particules flottantes ameliorees */}
         <div className="absolute inset-0 pointer-events-none">
           {[...Array(30)].map((_, i) => (
             <div
@@ -1309,7 +1338,7 @@ const RegisterPage: React.FC = () => {
               transform: translateY(0);
             }
           }
-          
+
           .animate-fade-in-up {
             animation: fade-in-up 1s ease-out;
           }
@@ -1320,5 +1349,3 @@ const RegisterPage: React.FC = () => {
 };
 
 export default RegisterPage;
-
-

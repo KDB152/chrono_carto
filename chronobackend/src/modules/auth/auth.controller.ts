@@ -19,6 +19,7 @@ import {
 } from './dto/verify-email.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';  // <--- AJOUTEZ CET IMPORT
 import { User } from '../users/entities/user.entity';
+import { StudentsService } from '../students/students.service';
 
 @Controller('auth')
 export class AuthController {
@@ -27,14 +28,22 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private emailVerificationService: EmailVerificationService,
+    private studentsService: StudentsService,
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
+
+  @Get('group-occupancy')
+  async getGroupOccupancy() {
+    return this.studentsService.getGroupOccupancy();
+  }
 
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
     this.logger.log(`Tentative d'inscription pour: ${registerDto.email}`);
     try {
+      const classLevel = registerDto.studentClass || registerDto.childClass;
+      await this.studentsService.assertGroupHasCapacity(classLevel);
       const result = await this.authService.register(registerDto);
       this.logger.log(`Inscription réussie pour: ${registerDto.email}`);
       return result;

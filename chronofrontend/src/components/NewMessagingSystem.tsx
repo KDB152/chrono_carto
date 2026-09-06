@@ -75,54 +75,7 @@ const NewMessagingSystem: React.FC<NewMessagingSystemProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Emojis populaires
-  const popularEmojis = [
-    '😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣',
-    '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰',
-    '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜',
-    '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏',
-    '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣',
-    '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠',
-    '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨',
-    '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥',
-    '😶', '😐', '😑', '😬', '🙄', '😯', '😦', '😧',
-    '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐',
-    '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑',
-    '🤠', '😈', '👿', '👹', '👺', '🤡', '💩', '👻',
-    '💀', '☠️', '👽', '👾', '🤖', '🎃', '😺', '😸',
-    '😹', '😻', '😼', '😽', '🙀', '😿', '😾', '👶',
-    '👧', '🧒', '👦', '👩', '🧑', '👨', '👱', '👴',
-    '👵', '🧓', '👲', '👳', '👮', '👷', '💂', '🕵️',
-    '👩‍⚕️', '👨‍⚕️', '👩‍🌾', '👨‍🌾', '👩‍🍳', '👨‍🍳', '👩‍🎓', '👨‍🎓',
-    '👩‍🎤', '👨‍🎤', '👩‍🏫', '👨‍🏫', '👩‍🏭', '👨‍🏭', '👩‍💻', '👨‍💻',
-    '👩‍💼', '👨‍💼', '👩‍🔧', '👨‍🔧', '👩‍🔬', '👨‍🔬', '👩‍🎨', '👨‍🎨',
-    '👩‍🚒', '👨‍🚒', '👩‍✈️', '👨‍✈️', '👩‍🚀', '👨‍🚀', '👩‍⚖️', '👨‍⚖️',
-    '👰', '🤵', '👸', '🤴', '🦸', '🦹', '🤶', '🎅',
-    '🧙', '🧚', '🧛', '🧜', '🧝', '🧞', '🧟', '💆',
-    '💇', '🚶', '🏃', '💃', '🕺', '👯', '🧖', '🧗',
-    '🤺', '🏇', '⛷️', '🏂', '🏌️', '🏄', '🚣', '🏊',
-    '⛹️', '🏋️', '🚴', '🚵', '🤸', '🤼', '🤽', '🤾',
-    '🤹', '🧘', '🛀', '🛌', '👭', '👫', '👬', '💏',
-    '💑', '👪', '🗣️', '👤', '👥', '👣', '🐵', '🐒',
-    '🦍', '🦧', '🐶', '🐕', '🦮', '🐕‍🦺', '🐩', '🐺',
-    '🦊', '🦝', '🐱', '🐈', '🦁', '🐯', '🐅', '🐆',
-    '🐴', '🐎', '🦄', '🦓', '🦌', '🐮', '🐂', '🐃',
-    '🐄', '🐷', '🐖', '🐗', '🐽', '🐏', '🐑', '🐐',
-    '🐪', '🐫', '🦙', '🦒', '🐘', '🦏', '🦛', '🐭',
-    '🐁', '🐀', '🐹', '🐰', '🐇', '🐿️', '🦔', '🦇',
-    '🐻', '🐨', '🐼', '🦥', '🦦', '🦨', '🦘', '🦡',
-    '🐾', '🦃', '🐔', '🐓', '🐣', '🐤', '🐥', '🐦',
-    '🦅', '🦆', '🦢', '🦉', '🦚', '🦜', '🐸', '🐊',
-    '🐢', '🦎', '🐍', '🐲', '🐉', '🦕', '🦖', '🐳',
-    '🐋', '🐬', '🦈', '🐟', '🐠', '🐡', '🦀', '🦞',
-    '🦐', '🦑', '🐙', '🦆', '🦢', '🦉', '🦚', '🦜',
-    '🐸', '🐊', '🐢', '🦎', '🐍', '🐲', '🐉', '🦕',
-    '🦖', '🐳', '🐋', '🐬', '🦈', '🐟', '🐠', '🐡',
-    '🦀', '🦞', '🦐', '🦑', '🐙', '🦆', '🦢', '🦉',
-    '🦚', '🦜', '🐸', '🐊', '🐢', '🦎', '🐍', '🐲',
-    '🐉', '🦕', '🦖', '🐳', '🐋', '🐬', '🦈', '🐟',
-    '🐠', '🐡', '🦀', '🦞', '🦐', '🦑', '🐙'
-  ];
+  const popularEmojis: string[] = [];
 
   // Charger les conversations
   const loadConversations = async () => {
@@ -166,14 +119,14 @@ const NewMessagingSystem: React.FC<NewMessagingSystemProps> = ({
       
       // Recharger les messages
       await loadMessages(currentConversation.id);
-      await loadConversations(); // Mettre à jour la liste des conversations
+      await loadConversations(); // Mettre � jour la liste des conversations
     } catch (error) {
       console.error('Erreur lors de l\'envoi du message:', error);
       setError('Erreur lors de l\'envoi du message');
     }
   };
 
-  // Sélectionner une conversation
+  // S�lectionner une conversation
   const selectConversation = (conversation: Conversation) => {
     setCurrentConversation(conversation);
     loadMessages(conversation.id);
@@ -187,7 +140,7 @@ const NewMessagingSystem: React.FC<NewMessagingSystemProps> = ({
   // Obtenir le nom d'affichage d'une conversation
   const getConversationDisplayName = (conversation: Conversation) => {
     if (conversation.type === 'group') {
-      // Supprimer le préfixe "Groupe" des noms de groupes
+      // Supprimer le pr�fixe "Groupe" des noms de groupes
       return conversation.title.replace(/^Groupe\s+/i, '');
     } else {
       // Pour les conversations directes, afficher le nom de l'autre participant
@@ -220,7 +173,7 @@ const NewMessagingSystem: React.FC<NewMessagingSystemProps> = ({
     setShowEmojiPicker(false);
   };
 
-  // Gérer l'upload de fichier
+  // G�rer l'upload de fichier
   const handleFileUpload = async (file: File) => {
     try {
       const formData = new FormData();
@@ -246,7 +199,7 @@ const NewMessagingSystem: React.FC<NewMessagingSystemProps> = ({
     }
   };
 
-  // Télécharger un fichier
+  // T�l�charger un fichier
   const downloadFile = async (filePath: string, fileName: string) => {
     try {
       const response = await messagingAPI.downloadFile(filePath);
@@ -260,8 +213,8 @@ const NewMessagingSystem: React.FC<NewMessagingSystemProps> = ({
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error('Erreur lors du téléchargement:', error);
-      setError('Erreur lors du téléchargement du fichier');
+      console.error('Erreur lors du t�l�chargement:', error);
+      setError('Erreur lors du t�l�chargement du fichier');
     }
   };
 
@@ -395,7 +348,7 @@ const NewMessagingSystem: React.FC<NewMessagingSystemProps> = ({
                           className="flex items-center space-x-2 text-blue-400 hover:text-blue-300"
                         >
                           <Download className="w-4 h-4" />
-                          <span className="text-xs">Télécharger le fichier</span>
+                          <span className="text-xs">T�l�charger le fichier</span>
                         </button>
                       </div>
                     )}
@@ -484,11 +437,11 @@ const NewMessagingSystem: React.FC<NewMessagingSystemProps> = ({
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center text-white">
               <MessageSquare className="w-16 h-16 mx-auto mb-4 text-blue-400" />
-              <h3 className="text-xl font-semibold mb-2">Sélectionnez une conversation</h3>
+              <h3 className="text-xl font-semibold mb-2">S�lectionnez une conversation</h3>
               <p className="text-gray-400">
                 {currentUserRole === 'admin' 
-                  ? 'Choisissez un groupe ou un parent pour commencer à discuter'
-                  : 'Choisissez une conversation pour commencer à discuter'
+                  ? 'Choisissez un groupe ou un parent pour commencer � discuter'
+                  : 'Choisissez une conversation pour commencer � discuter'
                 }
               </p>
             </div>

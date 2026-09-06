@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { AVAILABLE_CLASSES, AVAILABLE_LEVELS } from '@/constants/classes';
+import { AVAILABLE_CLASSES, AVAILABLE_LEVELS, getClassLabel, GROUP_FULL_MESSAGE } from '@/constants/classes';
 import {
   Users,
   UserPlus,
@@ -42,7 +42,7 @@ import {
   Plus,
   Loader2
 } from 'lucide-react';
-import urlapi from '@/config/url';
+
 interface Student {
   id: number;
   firstName: string;
@@ -113,17 +113,38 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
   const [userToDelete, setUserToDelete] = useState<Student | Parent | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null);
+  const [fullGroups, setFullGroups] = useState<string[]>([]);
 
   const classes = AVAILABLE_CLASSES;
   const levels = AVAILABLE_LEVELS;
 
-  // Gérer les paramètres d'URL pour ouvrir automatiquement le modal de création
+  // Gerer les parametres d'URL pour ouvrir automatiquement le modal de creation
   useEffect(() => {
     const action = searchParams.get('action');
     if (action === 'create') {
       setShowAddModal(true);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const loadOccupancy = async () => {
+      try {
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const response = await fetch(`${API_BASE}/auth/group-occupancy`);
+        if (!response.ok) return;
+        const data = await response.json();
+        setFullGroups(
+          (data.groups || [])
+            .filter((group: { isFull: boolean }) => group.isFull)
+            .map((group: { classLevel: string }) => group.classLevel)
+        );
+      } catch {
+        setFullGroups([]);
+      }
+    };
+
+    loadOccupancy();
+  }, [students]);
 
 
   const showNotification = (type: 'success' | 'error', message: string) => {
@@ -136,10 +157,10 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
     try {
       setIsLoading(true);
       await onCreateStudent(studentData);
-      showNotification('success', 'Étudiant créé avec succès');
+      showNotification('success', 'Etudiant cree avec succes');
       setShowAddModal(false);
     } catch (error) {
-      showNotification('error', 'Erreur lors de la création de l\'étudiant');
+      showNotification('error', "Erreur lors de la creation de l'etudiant");
     } finally {
       setIsLoading(false);
     }
@@ -150,11 +171,11 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
     try {
       setIsLoading(true);
       await onUpdateStudent(id, studentData);
-      showNotification('success', 'Étudiant mis à jour avec succès');
+      showNotification('success', 'Etudiant mis a jour avec succes');
       setShowEditModal(false);
       setUserToEdit(null);
     } catch (error) {
-      showNotification('error', 'Erreur lors de la mise à jour de l\'étudiant');
+      showNotification('error', "Erreur lors de la mise a jour de l'etudiant");
     } finally {
       setIsLoading(false);
     }
@@ -165,11 +186,11 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
     try {
       setIsLoading(true);
       await onDeleteStudent(id);
-      showNotification('success', 'Étudiant supprimé avec succès');
+      showNotification('success', 'Etudiant supprime avec succes');
       setShowDeleteModal(false);
       setUserToDelete(null);
     } catch (error) {
-      showNotification('error', 'Erreur lors de la suppression de l\'étudiant');
+      showNotification('error', "Erreur lors de la suppression de l'etudiant");
     } finally {
       setIsLoading(false);
     }
@@ -180,10 +201,10 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
     try {
       setIsLoading(true);
       await onCreateParent(parentData);
-      showNotification('success', 'Parent créé avec succès');
+      showNotification('success', 'Parent cree avec succes');
       setShowAddModal(false);
     } catch (error) {
-      showNotification('error', 'Erreur lors de la création du parent');
+      showNotification('error', 'Erreur lors de la creation du parent');
     } finally {
       setIsLoading(false);
     }
@@ -194,11 +215,11 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
     try {
       setIsLoading(true);
       await onUpdateParent(id, parentData);
-      showNotification('success', 'Parent mis à jour avec succès');
+      showNotification('success', 'Parent mis a jour avec succes');
       setShowEditModal(false);
       setUserToEdit(null);
     } catch (error) {
-      showNotification('error', 'Erreur lors de la mise à jour du parent');
+      showNotification('error', 'Erreur lors de la mise a jour du parent');
     } finally {
       setIsLoading(false);
     }
@@ -209,7 +230,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
     try {
       setIsLoading(true);
       await onDeleteParent(id);
-      showNotification('success', 'Parent supprimé avec succès');
+      showNotification('success', 'Parent supprime avec succes');
       setShowDeleteModal(false);
       setUserToDelete(null);
     } catch (error) {
@@ -224,9 +245,9 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
     try {
       setIsLoading(true);
       await onApproveUser(id, approve);
-      showNotification('success', `Utilisateur ${approve ? 'approuvé' : 'désapprouvé'} avec succès`);
+      showNotification('success', `Utilisateur ${approve ? 'approuve' : 'desapprouve'} avec succes`);
     } catch (error) {
-      showNotification('error', 'Erreur lors de l\'approbation de l\'utilisateur');
+      showNotification('error', "Erreur lors de l'approbation de l'utilisateur");
     } finally {
       setIsLoading(false);
     }
@@ -240,11 +261,11 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
     }
   };
 
-  // Fonction pour charger les données de relation
+  // Fonction pour charger les donnees de relation
   const loadUserRelationData = async (user: Student | Parent) => {
     try {
     if (activeTab === 'students') {
-        // Pour un étudiant, charger les données du parent
+        // Pour un etudiant, charger les donnees du parent
         const parentData = await fetchParentDataForStudent(user.id);
         return {
           ...user,
@@ -253,7 +274,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
           parentEmail: parentData?.email || '',
         };
     } else {
-        // Pour un parent, charger les données de l'enfant
+        // Pour un parent, charger les donnees de l'enfant
         const childData = await fetchChildDataForParent(user.id);
         return {
           ...user,
@@ -264,15 +285,15 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
         };
       }
     } catch (error) {
-      console.error('Erreur lors du chargement des données de relation:', error);
+      console.error('Erreur lors du chargement des donnees de relation:', error);
       return user;
     }
   };
 
-  // Fonction pour récupérer les données du parent d'un étudiant
+  // Fonction pour recuperer les donnees du parent d'un etudiant
   const fetchParentDataForStudent = async (studentId: number) => {
     try {
-      const response = await fetch(`${urlapi.backendurlsapi.studentmangement}/${studentId}${urlapi.backendurlsapi.parent}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/students/${studentId}/parent`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
         },
@@ -281,15 +302,15 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
         return await response.json();
       }
     } catch (error) {
-      console.error('Erreur lors de la récupération des données du parent:', error);
+      console.error('Erreur lors de la recuperation des donnees du parent:', error);
     }
     return null;
   };
 
-  // Fonction pour récupérer les données de l'enfant d'un parent
+  // Fonction pour recuperer les donnees de l'enfant d'un parent
   const fetchChildDataForParent = async (parentId: number) => {
     try {
-      const response = await fetch(`${urlapi.backendurlsapi.parents}/${parentId}${urlapi.backendurlsapi.childddd}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/parents/${parentId}/child`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('accessToken') || localStorage.getItem('token')}`,
         },
@@ -298,7 +319,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
         return await response.json();
       }
     } catch (error) {
-      console.error('Erreur lors de la récupération des données de l\'enfant:', error);
+      console.error("Erreur lors de la recuperation des donnees de l'enfant:", error);
     }
     return null;
   };
@@ -306,8 +327,8 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
   const handleEditUser = async (updatedUser: Student | Parent) => {
     try {
       setIsLoading(true);
-      
-      // Préparer les données pour l'API backend
+
+      // Preparer les donnees pour l'API backend
       const userData = {
         // Champs User de base
         firstName: updatedUser.firstName,
@@ -317,43 +338,43 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
         isActive: updatedUser.isActive,
         isApproved: updatedUser.isApproved,
         role: activeTab === 'students' ? 'student' : 'parent',
-        
-        // Champs spécifiques aux étudiants
+
+        // Champs specifiques aux etudiants
         ...(activeTab === 'students' && {
           classLevel: (updatedUser as any).classLevel || (updatedUser as any).class,
           birthDate: (updatedUser as any).birthDate ? (updatedUser as any).birthDate.split('T')[0] : (updatedUser as any).birth_date,
         }),
-        
-        // Note: Les champs parent/enfant ne sont plus envoyés car ils ne sont pas stockés
-        // dans l'entité User mais dans les entités Student/Parent séparées
-        
-        
+
+        // Note: Les champs parent/enfant ne sont plus envoyes car ils ne sont pas stockes
+        // dans l'entite User mais dans les entites Student/Parent separees
+
+
       };
 
-      console.log('🔍 Frontend - Sending user data:', userData);
-      console.log('🔍 Frontend - Phone fields:', {
+      console.log('Frontend - Sending user data:', userData);
+      console.log('Frontend - Phone fields:', {
         phone: (updatedUser as any).phone,
         phone_number: (updatedUser as any).phone_number,
         'phone_number || phone': (updatedUser as any).phone_number || (updatedUser as any).phone
       });
 
       // Appeler l'API backend
-    
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-      
+
       // Utiliser directement l'ID de l'utilisateur (plus fiable que la recherche par email)
       const userId = updatedUser.id;
-      console.log('🔍 Using user ID directly:', userId, 'for user:', updatedUser.firstName, updatedUser.lastName);
-      console.log('🔍 Full user object:', updatedUser);
-      console.log('🔍 Available students IDs:', students.map(s => ({ id: s.id, name: `${s.firstName} ${s.lastName}`, email: s.email })));
-      console.log('🔍 Available parents IDs:', parents.map(p => ({ id: p.id, name: `${p.firstName} ${p.lastName}`, email: p.email })));
-      
-      console.log('🔍 Updating user:', userId, 'with data:', userData);
-      console.log('🔍 Using token:', token ? 'Token present' : 'No token');
-      console.log('🔍 Backend URL:', urlapi.apibase);
-      console.log('🔍 Full URL:', `${urlapi.apibase}/users/${userId}`);
-      
-      const response = await fetch(`${urlapi.backendurlsapi.user}/${userId}`, {
+      console.log('Using user ID directly:', userId, 'for user:', updatedUser.firstName, updatedUser.lastName);
+      console.log('Full user object:', updatedUser);
+      console.log('Available students IDs:', students.map(s => ({ id: s.id, name: `${s.firstName} ${s.lastName}`, email: s.email })));
+      console.log('Available parents IDs:', parents.map(p => ({ id: p.id, name: `${p.firstName} ${p.lastName}`, email: p.email })));
+
+      console.log('Updating user:', userId, 'with data:', userData);
+      console.log('Using token:', token ? 'Token present' : 'No token');
+      console.log('Backend URL:', backendUrl);
+      console.log('Full URL:', `${backendUrl}/users/${userId}`);
+
+      const response = await fetch(`${backendUrl}/users/${userId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -362,13 +383,13 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
         body: JSON.stringify(userData),
       });
 
-      console.log('🔍 Response status:', response.status);
-      console.log('🔍 Response headers:', response.headers);
-      
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('🔍 Error response:', errorText);
-        
+        console.error('Error response:', errorText);
+
         // Essayer de parser l'erreur JSON
         let errorMessage = `Erreur ${response.status}`;
         try {
@@ -379,50 +400,50 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
         } catch (e) {
           errorMessage = errorText || `Erreur ${response.status}`;
         }
-        
-        throw new Error(`Erreur lors de la mise à jour de l'utilisateur: ${errorMessage}`);
+
+        throw new Error(`Erreur lors de la mise a jour de l'utilisateur: ${errorMessage}`);
       }
 
-      // Récupérer la réponse de succès
+      // Recuperer la reponse de succes
       const responseData = await response.json();
-      console.log('🔍 Backend response data:', responseData);
+      console.log('Backend response data:', responseData);
 
-      // L'endpoint PUT /users/:id retourne déjà les données mises à jour
-      // Pas besoin de faire un appel supplémentaire
+      // L'endpoint PUT /users/:id retourne deja les donnees mises a jour
+      // Pas besoin de faire un appel supplementaire
 
-      // Recharger les données pour s'assurer que l'affichage est à jour
-      console.log('🔍 Frontend - Reloading data after update...');
-      
+      // Recharger les donnees pour s'assurer que l'affichage est a jour
+      console.log('Frontend - Reloading data after update...');
+
       if (activeTab === 'students') {
         await loadStudents();
-        console.log('🔍 Frontend - Students data reloaded');
+        console.log('Frontend - Students data reloaded');
       } else {
         await loadParents();
-        console.log('🔍 Frontend - Parents data reloaded');
+        console.log('Frontend - Parents data reloaded');
       }
 
-      // Attendre un peu pour s'assurer que les données sont mises à jour
+      // Attendre un peu pour s'assurer que les donnees sont mises a jour
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      showNotification('success', 'Utilisateur mis à jour avec succès');
+      showNotification('success', 'Utilisateur mis a jour avec succes');
       setShowEditModal(false);
       setUserToEdit(null);
-      
+
     } catch (error) {
-      console.error('Erreur lors de la mise à jour:', error);
-      
-      // Afficher un message d'erreur plus détaillé
-      let errorMessage = 'Erreur lors de la mise à jour de l\'utilisateur';
+      console.error('Erreur lors de la mise a jour:', error);
+
+      // Afficher un message d'erreur plus detaille
+      let errorMessage = "Erreur lors de la mise a jour de l'utilisateur";
       if (error instanceof Error) {
-        if (error.message.includes('n\'existe pas dans la base de données')) {
-          errorMessage = 'Utilisateur introuvable dans la base de données';
+        if (error.message.includes("n'existe pas dans la base de donnees")) {
+          errorMessage = 'Utilisateur introuvable dans la base de donnees';
         } else if (error.message.includes('500')) {
-          errorMessage = 'Erreur serveur - Vérifiez que l\'utilisateur existe';
+          errorMessage = "Erreur serveur - Verifiez que l'utilisateur existe";
         } else {
           errorMessage = error.message;
         }
       }
-      
+
       showNotification('error', errorMessage);
     } finally {
       setIsLoading(false);
@@ -434,25 +455,25 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
 
     // Validation des champs de base
     if (!userData.firstName || !userData.firstName.trim()) {
-      errors.firstName = 'Le prénom est obligatoire';
+      errors.firstName = 'Le prenom est obligatoire';
     }
     if (!userData.lastName || !userData.lastName.trim()) {
       errors.lastName = 'Le nom est obligatoire';
     }
     if (!userData.email || !userData.email.trim()) {
-      errors.email = 'L\'email est obligatoire';
+      errors.email = "L'email est obligatoire";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userData.email)) {
       errors.email = 'Veuillez entrer un email valide';
     }
     if (!userData.phone_number || !userData.phone_number.trim()) {
-      errors.phone_number = 'Le numéro de téléphone est obligatoire';
+      errors.phone_number = 'Le numero de telephone est obligatoire';
     } else if (!/^[0-9+\-\s()]+$/.test(userData.phone_number)) {
-      errors.phone_number = 'Veuillez entrer un numéro de téléphone valide';
+      errors.phone_number = 'Veuillez entrer un numero de telephone valide';
     }
     if (!userData.password || !userData.password.trim()) {
       errors.password = 'Le mot de passe est obligatoire';
     } else if (userData.password.length < 8) {
-      errors.password = 'Le mot de passe doit contenir au moins 8 caractères';
+      errors.password = 'Le mot de passe doit contenir au moins 8 caracteres';
     }
     if (!userData.confirmPassword || !userData.confirmPassword.trim()) {
       errors.confirmPassword = 'La confirmation du mot de passe est obligatoire';
@@ -460,35 +481,39 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
       errors.confirmPassword = 'Les mots de passe ne correspondent pas';
     }
 
-    // Validation spécifique aux étudiants
+    // Validation specifique aux etudiants
     if (userType === 'students') {
       if (!userData.classLevel || !userData.classLevel.trim()) {
         errors.classLevel = 'La classe est requise';
+      } else if (fullGroups.includes(userData.classLevel)) {
+        errors.classLevel = GROUP_FULL_MESSAGE;
       }
-      // Validation du parent pour les étudiants
+      // Validation du parent pour les etudiants
       if (!userData.parentPhone || !userData.parentPhone.trim()) {
-        errors.parentPhone = 'Le numéro de téléphone du parent est obligatoire';
+        errors.parentPhone = 'Le numero de telephone du parent est obligatoire';
       } else if (!/^[0-9+\-\s()]+$/.test(userData.parentPhone)) {
-        errors.parentPhone = 'Veuillez entrer un numéro de téléphone valide pour le parent';
+        errors.parentPhone = 'Veuillez entrer un numero de telephone valide pour le parent';
       }
     }
 
-    // Validation spécifique aux parents
+    // Validation specifique aux parents
     if (userType === 'parents') {
-      // Validation obligatoire des données enfant
+      // Validation obligatoire des donnees enfant
       if (!userData.childFirstName || !userData.childFirstName.trim()) {
-        errors.childFirstName = 'Le prénom de l\'enfant est obligatoire';
+        errors.childFirstName = "Le prenom de l'enfant est obligatoire";
       }
       if (!userData.childLastName || !userData.childLastName.trim()) {
-        errors.childLastName = 'Le nom de l\'enfant est obligatoire';
+        errors.childLastName = "Le nom de l'enfant est obligatoire";
       }
       if (!userData.childPhone || !userData.childPhone.trim()) {
-        errors.childPhone = 'Le numéro de téléphone de l\'enfant est obligatoire';
+        errors.childPhone = "Le numero de telephone de l'enfant est obligatoire";
       } else if (!/^[0-9+\-\s()]+$/.test(userData.childPhone)) {
-        errors.childPhone = 'Veuillez entrer un numéro de téléphone valide pour l\'enfant';
+        errors.childPhone = "Veuillez entrer un numero de telephone valide pour l'enfant";
       }
       if (!userData.childClass || !userData.childClass.trim()) {
-        errors.childClass = 'La classe de l\'enfant est obligatoire';
+        errors.childClass = "La classe de l'enfant est obligatoire";
+      } else if (fullGroups.includes(userData.childClass)) {
+        errors.childClass = GROUP_FULL_MESSAGE;
       }
     }
 
@@ -498,24 +523,24 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
   const handleAddUser = async (newUser: Partial<Student | Parent>) => {
     try {
       setIsLoading(true);
-      
-      // Validation des données
+
+      // Validation des donnees
       const validationErrors = validateUserData(newUser, activeTab);
       if (Object.keys(validationErrors).length > 0) {
         const errorMessage = Object.values(validationErrors).join(', ');
         showNotification('error', `Erreurs de validation: ${errorMessage}`);
         return;
       }
-      
+
     if (activeTab === 'students') {
-        // Créer un étudiant avec son parent via l'endpoint d'inscription
+        // Creer un etudiant avec son parent via l'endpoint d'inscription
         const mainPassword = (newUser as any).password || 'changeme123';
         const registrationData = {
           userType: 'student',
           first_name: (newUser as any).firstName,
           last_name: (newUser as any).lastName,
         email: (newUser as any).email,
-          phone: (newUser as any).phone_number, // ✅ Correct mapping
+          phone: (newUser as any).phone_number,
           password: mainPassword, // Utiliser le mot de passe saisi
           studentBirthDate: (newUser as any).birthDate || '2000-01-01',
           studentClass: (newUser as any).classLevel,
@@ -524,26 +549,28 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
           parentLastName: (newUser as any).parentLastName || 'Temporaire',
           parentEmail: (newUser as any).parentEmail || `parent.${(newUser as any).email}`,
           parentPhone: (newUser as any).parentPhone || (newUser as any).phone_number,
-          parentPassword: mainPassword // Même mot de passe que l'étudiant
+          parentPassword: mainPassword // Meme mot de passe que l'etudiant
         };
-        
-        console.log('🔍 Creating student with data:', registrationData);
-        console.log('🔍 Phone field value:', (newUser as any).phone_number);
-        
-       
-        const response = await fetch(`${urlapi.urlsapi.register}`, {
+
+        console.log('Creating student with data:', registrationData);
+        console.log('Phone field value:', (newUser as any).phone_number);
+
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const response = await fetch(`${API_BASE}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(registrationData)
         });
-        
+
         if (!response.ok) {
-          throw new Error('Erreur lors de la création de l\'étudiant et du parent');
+          const errorData = await response.json().catch(() => ({}));
+          const backendMessage = Array.isArray(errorData.message) ? errorData.message[0] : errorData.message;
+          throw new Error(backendMessage || "Erreur lors de la creation de l'etudiant et du parent");
         }
-        
-        showNotification('success', 'Étudiant et parent créés avec succès');
+
+        showNotification('success', 'Etudiant et parent crees avec succes');
     } else {
-        // Créer un parent avec son enfant via l'endpoint d'inscription
+        // Creer un parent avec son enfant via l'endpoint d'inscription
         const mainPassword = (newUser as any).password || 'changeme123';
         const registrationData = {
           userType: 'parent',
@@ -558,33 +585,35 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
           childEmail: (newUser as any).childEmail || `enfant.${(newUser as any).email}`,
           childPhone: (newUser as any).childPhone || (newUser as any).phone_number,
           childBirthDate: (newUser as any).childBirthDate || '2010-01-01',
-          childClass: (newUser as any).childClass || 'Terminale groupe 1',
-          childPassword: mainPassword // Même mot de passe que le parent
+          childClass: (newUser as any).childClass || 'Terminale groupe 1 (Lundi 18h30-20h30)',
+          childPassword: mainPassword // Meme mot de passe que le parent
         };
-        
-  
-        const response = await fetch(`${urlapi.urlsapi.register}`, {
+
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const response = await fetch(`${API_BASE}/auth/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(registrationData)
         });
-        
+
         if (!response.ok) {
-          throw new Error('Erreur lors de la création du parent et de l\'enfant');
+          const errorData = await response.json().catch(() => ({}));
+          const backendMessage = Array.isArray(errorData.message) ? errorData.message[0] : errorData.message;
+          throw new Error(backendMessage || "Erreur lors de la creation du parent et de l'enfant");
         }
-        
-        showNotification('success', 'Parent et enfant créés avec succès');
+
+        showNotification('success', 'Parent et enfant crees avec succes');
       }
-      
+
       setShowAddModal(false);
-      // Recharger les données
+      // Recharger les donnees
       if (activeTab === 'students') {
         loadStudents();
       } else {
         loadParents();
       }
     } catch (error) {
-      showNotification('error', error instanceof Error ? error.message : 'Erreur lors de la création');
+      showNotification('error', error instanceof Error ? error.message : 'Erreur lors de la creation');
     } finally {
       setIsLoading(false);
     }
@@ -602,7 +631,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
                          (student.email?.toLowerCase() || '').includes(searchQuery.toLowerCase());
     const matchesStatus = filterStatus === 'Tous' || (student.isActive ? 'Actif' : 'Inactif') === filterStatus;
     const matchesClass = filterClass === 'Tous' || student.classLevel === filterClass;
-    
+
     return matchesSearch && matchesStatus && matchesClass;
   });
 
@@ -611,7 +640,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
                          (parent.lastName?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
                          (parent.email?.toLowerCase() || '').includes(searchQuery.toLowerCase());
     const matchesStatus = filterStatus === 'Tous' || (parent.isActive ? 'Actif' : 'Inactif') === filterStatus;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -629,8 +658,8 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
       {/* Notification */}
       {notification && (
         <div className={`fixed top-4 right-4 z-50 p-4 rounded-xl shadow-lg backdrop-blur-xl border ${
-          notification.type === 'success' 
-            ? 'bg-green-500/20 border-green-500/30 text-green-100' 
+          notification.type === 'success'
+            ? 'bg-green-500/20 border-green-500/30 text-green-100'
             : 'bg-red-500/20 border-red-500/30 text-red-100'
         }`}>
           <div className="flex items-center space-x-2">
@@ -644,7 +673,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
         </div>
       )}
 
-      {/* En-tête */}
+      {/* En-tete */}
       <div className="bg-white/10 backdrop-blur-xl rounded-2xl shadow-xl p-6 border border-white/20">
         <div className="flex items-center justify-between">
           <div>
@@ -652,9 +681,9 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
               <Users className="w-5 h-5 text-blue-300 mr-4" />
               Gestion des utilisateurs
             </h1>
-            <p className="text-blue-200 mt-2">Gérez les comptes étudiants et parents</p>
+            <p className="text-blue-200 mt-2">Gerez les comptes etudiants et parents</p>
             <div className="flex items-center space-x-3 mt-3 text-sm text-blue-300">
-              <span>Étudiants: {students.length}</span>
+              <span>Etudiants: {students.length}</span>
               <span>Parents: {parents.length}</span>
               <span>Actifs: {[...students, ...parents].filter(u => u.isActive).length}</span>
               <span className={`${[...students, ...parents].filter(u => !u.isApproved).length > 0 ? 'text-yellow-300' : ''}`}>
@@ -679,7 +708,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
                     try {
                       await handleApproveUser(user.id, true);
                     } catch (error) {
-                      console.error('Erreur lors de l\'approbation:', error);
+                      console.error("Erreur lors de l'approbation:", error);
                     }
                   }
                 }}
@@ -713,7 +742,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
           >
             <div className="flex items-center justify-center space-x-2">
               <User className="w-5 h-5" />
-              <span>Étudiants ({students.length})</span>
+              <span>Etudiants ({students.length})</span>
             </div>
           </button>
           <button
@@ -750,11 +779,20 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
               <select
                 value={filterClass}
                 onChange={(e) => setFilterClass(e.target.value)}
-                className="px-4 py-3 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all bg-white/10 backdrop-blur-md text-white"
+                className="px-4 py-3 bg-blue-900 border border-blue-700 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all text-white"
               >
-                <option value="Tous">Toutes les classes</option>
+                <option value="Tous" className="bg-blue-900 text-white">
+                  Toutes les classes
+                </option>
+
                 {classes.map(cls => (
-                  <option key={cls} value={cls}>{cls}</option>
+                  <option
+                    key={cls}
+                    value={cls}
+                    className="bg-blue-900 text-white"
+                  >
+                    {getClassLabel(cls)}
+                  </option>
                 ))}
               </select>
             )}
@@ -769,7 +807,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
             {activeTab === 'students' ? (
               <>
                 <User className="w-5 h-5 text-blue-300 mr-2" />
-                Étudiants ({filteredStudents.length})
+                Etudiants ({filteredStudents.length})
               </>
             ) : (
               <>
@@ -807,7 +845,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
                         </span>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-white">{user.firstName || 'Prénom'} {user.lastName || 'Nom'}</p>
+                        <p className="text-sm font-medium text-white">{user.firstName || 'Prenom'} {user.lastName || 'Nom'}</p>
                         <p className="text-xs text-blue-300">{user.email}</p>
                       </div>
                     </div>
@@ -827,7 +865,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
                   {activeTab === 'students' && (
                     <>
                       <td className="px-3 py-4 whitespace-nowrap">
-                        <span className="text-sm text-blue-200">{(user as Student).classLevel}</span>
+                        <span className="text-sm text-blue-200">{getClassLabel((user as Student).classLevel)}</span>
                       </td>
                     </>
                   )}
@@ -838,11 +876,11 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
                   </td>
                   <td className="px-3 py-4 whitespace-nowrap">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      user.isApproved 
-                        ? 'bg-green-500/20 text-green-300 border border-green-500/30' 
+                      user.isApproved
+                        ? 'bg-green-500/20 text-green-300 border border-green-500/30'
                         : 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30'
                     }`}>
-                      {user.isApproved ? 'Approuvé' : 'En attente'}
+                      {user.isApproved ? 'Approuve' : 'En attente'}
                     </span>
                   </td>
                   <td className="px-3 py-4 whitespace-nowrap">
@@ -851,28 +889,28 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
                       <button
                         onClick={() => handleApproveUser(user.id, !user.isApproved)}
                         className={`p-2 rounded-lg transition-all ${
-                          user.isApproved 
-                            ? 'text-green-300 hover:text-white hover:bg-green-500/20' 
+                          user.isApproved
+                            ? 'text-green-300 hover:text-white hover:bg-green-500/20'
                             : 'text-yellow-300 hover:text-white hover:bg-yellow-500/20'
                         }`}
-                        title={user.isApproved ? 'Approuvé' : 'En attente d\'approbation'}
+                        title={user.isApproved ? 'Approuve' : "En attente d'approbation"}
                       >
                         {user.isApproved ? <CheckCircle className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
                       </button>
-                      
-                      {/* Bouton d'activation/désactivation */}
+
+                      {/* Bouton d'activation/desactivation */}
                       <button
                         onClick={() => toggleUserStatus(user)}
                         className={`p-2 rounded-lg transition-all ${
-                          user.isActive 
-                            ? 'text-orange-300 hover:text-white hover:bg-orange-500/20' 
+                          user.isActive
+                            ? 'text-orange-300 hover:text-white hover:bg-orange-500/20'
                             : 'text-green-300 hover:text-white hover:bg-green-500/20'
                         }`}
-                        title={user.isActive ? 'Désactiver' : 'Activer'}
+                        title={user.isActive ? 'Desactiver' : 'Activer'}
                       >
                         {user.isActive ? <Ban className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
                       </button>
-                      
+
                       {/* Bouton de modification */}
                       <button
                         onClick={async () => {
@@ -882,7 +920,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
                             setUserToEdit(userWithRelationData);
                             setShowEditModal(true);
                           } catch (error) {
-                            console.error('Erreur lors du chargement des données:', error);
+                            console.error('Erreur lors du chargement des donnees:', error);
                           setUserToEdit(user);
                           setShowEditModal(true);
                           } finally {
@@ -895,7 +933,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
                       >
                         <Edit className="w-4 h-4" />
                       </button>
-                      
+
                       {/* Bouton de suppression */}
                       <button
                         onClick={() => {
@@ -917,7 +955,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
           {(activeTab === 'students' ? filteredStudents : filteredParents).length === 0 && (
             <div className="text-center py-6">
               <Users className="w-10 h-10 text-blue-300 mx-auto mb-4" />
-              <p className="text-blue-200 text-base">Aucun utilisateur trouvé</p>
+              <p className="text-blue-200 text-base">Aucun utilisateur trouve</p>
               <p className="text-blue-300 text-sm">Essayez de modifier vos filtres ou ajoutez un nouvel utilisateur</p>
             </div>
           )}
@@ -933,6 +971,7 @@ const UsersManagementTab: React.FC<UsersManagementTabProps> = ({
           isLoading={isLoading}
           classes={classes}
           levels={levels}
+          fullGroups={fullGroups}
         />
       )}
 
@@ -974,9 +1013,18 @@ interface AddUserModalProps {
   isLoading: boolean;
   classes: string[];
   levels: string[];
+  fullGroups: string[];
 }
 
-const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, isLoading, classes, levels }) => {
+const AddUserModal: React.FC<AddUserModalProps> = ({
+  userType,
+  onSave,
+  onClose,
+  isLoading,
+  classes,
+  levels,
+  fullGroups
+}) => {
   const [formData, setFormData] = useState<any>({
     firstName: '',
     lastName: '',
@@ -1008,7 +1056,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
         <div className="flex items-center justify-between p-6 border-b border-white/20">
           <h2 className="text-base font-bold text-white flex items-center">
             <UserPlus className="w-5 h-5 text-blue-300 mr-3" />
-            Ajouter un {userType === 'students' ? 'étudiant' : 'parent'}
+            Ajouter un {userType === 'students' ? 'etudiant' : 'parent'}
           </h2>
           <button onClick={onClose} className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-all">
             <X className="w-5 h-5" />
@@ -1018,7 +1066,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">Prénom *</label>
+              <label className="block text-sm font-semibold text-white mb-2">Prenom *</label>
               <input
                 type="text"
                 value={formData.firstName}
@@ -1048,7 +1096,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">Téléphone *</label>
+              <label className="block text-sm font-semibold text-white mb-2">Telephone *</label>
               <input
                 type="tel"
                 value={(formData as any).phone_number}
@@ -1083,13 +1131,13 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
 
           {userType === 'students' && (
             <>
-              {/* Informations personnelles de l'étudiant */}
+              {/* Informations personnelles de l'etudiant */}
               <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
                 <h3 className="text-base font-semibold text-white mb-4 flex items-center">
                   <User className="w-5 h-5 mr-2 text-amber-300" />
                   Informations personnelles
                 </h3>
-                
+
                 {/* Date de naissance et classe */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
@@ -1120,14 +1168,15 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
                         className="w-full pl-12 pr-4 py-4 bg-white/10 border rounded-xl text-white focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm appearance-none border-white/20"
                         required
                       >
-                        <option value="" className="bg-slate-800 text-white">Sélectionnez la classe</option>
+                        <option value="" className="bg-slate-800 text-white">Selectionnez la classe</option>
                         {classes.map((classe) => (
-                          <option 
-                            key={classe} 
-                            value={classe} 
+                          <option
+                            key={classe}
+                            value={classe}
+                            disabled={fullGroups.includes(classe)}
                             className="bg-slate-800 text-white"
                           >
-                            {classe}
+                            {getClassLabel(classe)}{fullGroups.includes(classe) ? ' - sature' : ''}
                           </option>
                     ))}
                   </select>
@@ -1147,19 +1196,19 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
                 <h3 className="text-base font-semibold text-white mb-4 flex items-center">
                   <User className="w-5 h-5 mr-2 text-amber-300" />
                   Informations des parents
-                  <span className="ml-2 text-sm font-normal text-red-400/80">(Téléphone obligatoire)</span>
+                  <span className="ml-2 text-sm font-normal text-red-400/80">(Telephone obligatoire)</span>
                 </h3>
                 <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-3 mb-4">
                   <p className="text-sm text-blue-200">
-                    <strong>💡 Information :</strong> Le numéro de téléphone de votre parent est obligatoire. 
-                    Si vous ne renseignez pas les autres informations de vos parents, 
-                    un compte parent temporaire sera créé automatiquement. Vous pourrez contacter l'administrateur pour le personnaliser plus tard.
+                    <strong>Information :</strong> Le numero de telephone de votre parent est obligatoire.
+                    Si vous ne renseignez pas les autres informations de vos parents,
+                    un compte parent temporaire sera cree automatiquement. Vous pourrez contacter l'administrateur pour le personnaliser plus tard.
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label className="block text-sm font-medium text-white/90 mb-3">Prénom du parent</label>
+                    <label className="block text-sm font-medium text-white/90 mb-3">Prenom du parent</label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <User className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -1169,7 +1218,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
                         value={formData.parentFirstName || ''}
                         onChange={(e) => setFormData((prev: any) => ({ ...prev, parentFirstName: e.target.value }))}
                         className="w-full pl-12 pr-4 py-4 bg-white/10 border rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm border-white/20"
-                        placeholder="Prénom du parent (optionnel)"
+                        placeholder="Prenom du parent (optionnel)"
                   />
                 </div>
                   </div>
@@ -1206,7 +1255,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
                   </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-white/90 mb-3">Téléphone du parent <span className="text-red-400 text-xs">*</span></label>
+                    <label className="block text-sm font-medium text-white/90 mb-3">Telephone du parent <span className="text-red-400 text-xs">*</span></label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <Phone className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -1216,7 +1265,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
                         value={formData.parentPhone || ''}
                     onChange={(e) => setFormData((prev: any) => ({ ...prev, parentPhone: e.target.value }))}
                         className="w-full pl-12 pr-4 py-4 bg-white/10 border rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm border-white/20"
-                        placeholder="Téléphone du parent (obligatoire)"
+                        placeholder="Telephone du parent (obligatoire)"
                         required
                       />
                     </div>
@@ -1267,7 +1316,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
                   <User className="w-5 h-5 mr-2 text-amber-300" />
                   Informations personnelles
                 </h3>
-                
+
               </div>
 
               {/* Informations de l'enfant */}
@@ -1278,18 +1327,18 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
                   <span className="ml-2 text-sm font-normal text-red-400/80">(Obligatoire)</span>
                 </h3>
                 <p className="text-sm text-white/70 mb-4">
-                  Si votre enfant a déjà créé son compte, contactez l'administrateur et ne créez pas de compte parent. Sinon, créez un compte pour vous-même et pour votre enfant.
+                  Si votre enfant a deja cree son compte, contactez l'administrateur et ne creez pas de compte parent. Sinon, creez un compte pour vous-meme et pour votre enfant.
                 </p>
                 <div className="bg-blue-500/10 border border-blue-400/30 rounded-lg p-3 mb-4">
                   <p className="text-sm text-blue-200">
-                    <strong>💡 Information :</strong> Les informations de votre enfant (nom, prénom, téléphone et classe) sont <strong className="text-red-300">obligatoires</strong>. 
-                    Un compte enfant sera créé automatiquement avec ces informations.
+                    <strong>Information :</strong> Les informations de votre enfant (nom, prenom, telephone et classe) sont <strong className="text-red-300">obligatoires</strong>.
+                    Un compte enfant sera cree automatiquement avec ces informations.
                   </p>
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-sm font-medium text-white/90 mb-3">Prénom de l'enfant <span className="text-red-400/80 text-xs">(Obligatoire)</span></label>
+                    <label className="block text-sm font-medium text-white/90 mb-3">Prenom de l'enfant <span className="text-red-400/80 text-xs">(Obligatoire)</span></label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <Baby className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -1299,7 +1348,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
                         value={formData.childFirstName || ''}
                         onChange={(e) => setFormData((prev: any) => ({ ...prev, childFirstName: e.target.value }))}
                         className="w-full pl-12 pr-4 py-4 bg-white/10 border rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm border-white/20"
-                        placeholder="Prénom de l'enfant (obligatoire)"
+                        placeholder="Prenom de l'enfant (obligatoire)"
                         required
                       />
                     </div>
@@ -1320,7 +1369,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
                   </div>
                 </div>
 
-                {/* Email et téléphone de l'enfant */}
+                {/* Email et telephone de l'enfant */}
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-white/90 mb-3">Email de l'enfant</label>
@@ -1339,7 +1388,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-white/90 mb-3">Téléphone de l'enfant <span className="text-red-400/80 text-xs">(Obligatoire)</span></label>
+                    <label className="block text-sm font-medium text-white/90 mb-3">Telephone de l'enfant <span className="text-red-400/80 text-xs">(Obligatoire)</span></label>
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <Phone className="h-5 w-5 text-blue-300 group-focus-within:text-amber-300 transition-colors" />
@@ -1349,7 +1398,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
                         value={formData.childPhone || ''}
                         onChange={(e) => setFormData((prev: any) => ({ ...prev, childPhone: e.target.value }))}
                         className="w-full pl-12 pr-4 py-4 bg-white/10 border rounded-xl text-white placeholder-white/50 focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm border-white/20"
-                        placeholder="Numéro de téléphone de l'enfant (obligatoire)"
+                        placeholder="Numero de telephone de l'enfant (obligatoire)"
                         required
                       />
                     </div>
@@ -1385,14 +1434,15 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ userType, onSave, onClose, 
                         className="w-full pl-12 pr-4 py-4 bg-white/10 border rounded-xl text-white focus:ring-2 focus:ring-amber-400 focus:border-transparent transition-all duration-200 backdrop-blur-sm appearance-none border-white/20"
                         required
                       >
-                        <option value="" className="bg-slate-800 text-white">Sélectionnez la classe de l'enfant (obligatoire)</option>
+                        <option value="" className="bg-slate-800 text-white">Selectionnez la classe de l'enfant (obligatoire)</option>
                         {classes.map((classe) => (
-                          <option 
-                            key={classe} 
-                            value={classe} 
+                          <option
+                            key={classe}
+                            value={classe}
+                            disabled={fullGroups.includes(classe)}
                             className="bg-slate-800 text-white"
                           >
-                            {classe}
+                            {getClassLabel(classe)}{fullGroups.includes(classe) ? ' - sature' : ''}
                           </option>
                         ))}
                       </select>
@@ -1495,7 +1545,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, userType, onSave, o
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return 'Format d\'email invalide';
+      return "Format d'email invalide";
     }
     return '';
   };
@@ -1503,43 +1553,43 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, userType, onSave, o
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newEmail = e.target.value;
     setFormData((prev: any) => ({ ...prev, email: newEmail }));
-    
-    // Validation en temps réel
+
+    // Validation en temps reel
     const error = validateEmail(newEmail);
     setEmailError(error);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validation finale
     const emailValidationError = validateEmail(formData.email);
     if (emailValidationError) {
       setEmailError(emailValidationError);
       return;
     }
-    
+
     // Validation des champs obligatoires
     const errors: string[] = [];
-    
-    if (!formData.firstName?.trim()) errors.push('Le prénom est obligatoire');
+
+    if (!formData.firstName?.trim()) errors.push('Le prenom est obligatoire');
     if (!formData.lastName?.trim()) errors.push('Le nom est obligatoire');
-    if (!formData.email?.trim()) errors.push('L\'email est obligatoire');
-    if (!formData.phone_number?.trim()) errors.push('Le téléphone est obligatoire');
-    
-    // Validation spécifique aux étudiants
+    if (!formData.email?.trim()) errors.push("L'email est obligatoire");
+    if (!formData.phone_number?.trim()) errors.push('Le telephone est obligatoire');
+
+    // Validation specifique aux etudiants
     if (userType === 'students') {
       if (!(formData as any).classLevel?.trim()) errors.push('La classe est obligatoire');
     }
-    
-    // Note: Les champs parent/enfant ne sont plus validés car ils ne sont pas modifiés
-    // dans ce modal (ils sont gérés via les entités Student/Parent séparées)
-    
+
+    // Note: Les champs parent/enfant ne sont plus valides car ils ne sont pas modifies
+    // dans ce modal (ils sont geres via les entites Student/Parent separees)
+
     if (errors.length > 0) {
       alert('Erreurs de validation:\n' + errors.join('\n'));
       return;
     }
-    
+
     setEmailError('');
     onSave(formData);
   };
@@ -1550,7 +1600,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, userType, onSave, o
         <div className="flex items-center justify-between p-6 border-b border-white/20">
           <h2 className="text-base font-bold text-white flex items-center">
             <Edit className="w-5 h-5 text-blue-300 mr-3" />
-            Modifier {userType === 'students' ? 'l\'étudiant' : 'le parent'}
+            Modifier {userType === 'students' ? "l'etudiant" : 'le parent'}
           </h2>
           <button onClick={onClose} className="text-white/80 hover:text-white hover:bg-white/10 p-2 rounded-lg transition-all">
             <X className="w-5 h-5" />
@@ -1566,7 +1616,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, userType, onSave, o
             </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">Prénom *</label>
+              <label className="block text-sm font-semibold text-white mb-2">Prenom *</label>
               <input
                 type="text"
                 value={formData.firstName}
@@ -1612,12 +1662,12 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, userType, onSave, o
               {!emailError && formData.email !== user.email && (
                 <p className="text-green-400 text-sm mt-1 flex items-center">
                   <CheckCircle className="w-4 h-4 mr-1" />
-                  Email modifié avec succès
+                  Email modifie avec succes
                 </p>
               )}
             </div>
             <div>
-              <label className="block text-sm font-semibold text-white mb-2">Téléphone *</label>
+              <label className="block text-sm font-semibold text-white mb-2">Telephone *</label>
               <input
                 type="tel"
                   value={(formData as any).phone_number || (formData as any).phone || ''}
@@ -1631,11 +1681,11 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, userType, onSave, o
 
           {userType === 'students' && (
             <>
-              {/* Informations académiques */}
+              {/* Informations academiques */}
               <div className="bg-white/5 rounded-xl p-6">
                 <h3 className="text-white font-semibold mb-4 flex items-center">
                   <BookOpen className="w-5 h-5 text-blue-300 mr-2" />
-                  Informations académiques
+                  Informations academiques
                 </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -1645,9 +1695,9 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, userType, onSave, o
                       onChange={(e) => setFormData((prev: any) => ({ ...prev, classLevel: e.target.value }))}
                     className="w-full px-4 py-3 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all bg-white/10 backdrop-blur-md text-white"
                   >
-                      <option value="">Sélectionner une classe</option>
+                      <option value="">Selectionner une classe</option>
                     {classes.map(cls => (
-                      <option key={cls} value={cls}>{cls}</option>
+                      <option key={cls} value={cls}>{getClassLabel(cls)}</option>
                     ))}
                   </select>
                 </div>
@@ -1665,8 +1715,8 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, userType, onSave, o
             </>
           )}
 
-          {/* Note: Les champs parent/enfant ne sont plus affichés dans le modal de modification
-               car ils ne sont pas stockés dans l'entité User mais dans les entités Student/Parent séparées */}
+          {/* Note: Les champs parent/enfant ne sont plus affiches dans le modal de modification
+               car ils ne sont pas stockes dans l'entite User mais dans les entites Student/Parent separees */}
 
 
           {/* Statut et approbation */}
@@ -1690,12 +1740,12 @@ const EditUserModal: React.FC<EditUserModalProps> = ({ user, userType, onSave, o
           <div>
                 <label className="block text-sm font-semibold text-white mb-2">Statut d'approbation</label>
                 <select
-                  value={(formData as any).isApproved ? 'Approuvé' : 'En attente'}
-                  onChange={(e) => setFormData((prev: any) => ({ ...prev, isApproved: e.target.value === 'Approuvé' }))}
+                  value={(formData as any).isApproved ? 'Approuve' : 'En attente'}
+                  onChange={(e) => setFormData((prev: any) => ({ ...prev, isApproved: e.target.value === 'Approuve' }))}
                   className="w-full px-4 py-3 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all bg-white/10 backdrop-blur-md text-white"
                 >
                   <option value="En attente">En attente</option>
-                  <option value="Approuvé">Approuvé</option>
+                  <option value="Approuve">Approuve</option>
                 </select>
               </div>
             </div>
@@ -1753,14 +1803,14 @@ const DeleteUserModal: React.FC<DeleteUserModalProps> = ({ user, onConfirm, onCl
             </div>
             <div>
               <h3 className="text-base font-bold text-white">Confirmer la suppression</h3>
-              <p className="text-blue-200 text-sm">Cette action est irréversible</p>
+              <p className="text-blue-200 text-sm">Cette action est irreversible</p>
             </div>
           </div>
-          
+
           <p className="text-blue-200 mb-3">
-            Êtes-vous sûr de vouloir supprimer l'utilisateur <strong className="text-white">"{user.firstName || 'Prénom'} {user.lastName || 'Nom'}"</strong> ?
+            Etes-vous sur de vouloir supprimer l'utilisateur <strong className="text-white">"{user.firstName || 'Prenom'} {user.lastName || 'Nom'}"</strong> ?
           </p>
-          
+
           <div className="flex items-center space-x-3">
             <button
               onClick={onClose}
@@ -1791,4 +1841,3 @@ const DeleteUserModal: React.FC<DeleteUserModalProps> = ({ user, onConfirm, onCl
 };
 
 export default UsersManagementTab;
-

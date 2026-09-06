@@ -19,8 +19,8 @@ import {
   Edit
 } from 'lucide-react';
 import { AnimatedPage, AnimatedCard, AnimatedButton, AnimatedTable, AnimatedTableRow, AnimatedStats } from '../../../components/ui/animations';
-import urlapi from '@/config/url';
-import { AVAILABLE_CLASSES } from '@/constants/classes';
+
+import { AVAILABLE_CLASSES, getClassLabel } from '@/constants/classes';
 
 interface Payment {
   id: number;
@@ -77,7 +77,7 @@ const PaymentsManagementTab: React.FC = () => {
       const token = localStorage.getItem('token') || localStorage.getItem('accessToken');
       
       // Récupérer les données depuis l'API attendance qui contient les vraies données de présence
-      const response = await fetch(`${urlapi.backendurlsapi.attendanceapi}`, {
+      const response = await fetch('/api/attendance', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -378,7 +378,7 @@ const PaymentsManagementTab: React.FC = () => {
               >
                 <option value="" className="bg-gray-800 text-white">Sélectionnez une classe</option>
                 {AVAILABLE_CLASSES.map(cls => (
-                  <option key={cls} value={cls} className="bg-gray-800 text-white">{cls}</option>
+                  <option key={cls} value={cls} className="bg-gray-800 text-white">{getClassLabel(cls)}</option>
                 ))}
               </select>
             </div>
@@ -532,7 +532,7 @@ const PaymentsManagementTab: React.FC = () => {
               >
                 <option value="" className="bg-gray-800 text-white">Sélectionnez une classe</option>
                 {AVAILABLE_CLASSES.map(cls => (
-                  <option key={cls} value={cls} className="bg-gray-800 text-white">{cls}</option>
+                  <option key={cls} value={cls} className="bg-gray-800 text-white">{getClassLabel(cls)}</option>
               ))}
             </select>
             

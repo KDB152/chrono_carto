@@ -1,10 +1,18 @@
 // src/modules/students/students.service.ts
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Student } from './entities/student.entity';
+import { In, Not, Repository } from 'typeorm';
+import { Student, ClassLevel } from './entities/student.entity';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
+import {
+  AVAILABLE_CLASS_LEVELS,
+  CLASS_LABELS,
+  GROUP_FULL_MESSAGE,
+  MAX_STUDENTS_PER_GROUP,
+  getClassLevelAliases,
+  normalizeClassLevel,
+} from '../../common/constants/classes';
 
 @Injectable()
 export class StudentsService {
@@ -27,17 +35,60 @@ export class StudentsService {
     return student;
   }
 
+  async countStudentsInGroup(classLevel: string, excludeStudentId?: number): Promise<number> {
+    const aliases = getClassLevelAliases(classLevel);
+    if (aliases.length === 0) {
+      return 0;
+    }
+
+    return this.studentsRepository.count({
+      where: excludeStudentId
+        ? { class_level: In(aliases as ClassLevel[]), id: Not(excludeStudentId) }
+        : { class_level: In(aliases as ClassLevel[]) },
+    });
+  }
+
+  async assertGroupHasCapacity(classLevel?: string | null, excludeStudentId?: number): Promise<void> {
+    const normalized = normalizeClassLevel(classLevel);
+    if (!normalized) {
+      return;
+    }
+
+    const count = await this.countStudentsInGroup(normalized, excludeStudentId);
+    if (count >= MAX_STUDENTS_PER_GROUP) {
+      throw new BadRequestException(GROUP_FULL_MESSAGE);
+    }
+  }
+
+  async getGroupOccupancy() {
+    const groups = await Promise.all(
+      AVAILABLE_CLASS_LEVELS.map(async (classLevel) => {
+        const count = await this.countStudentsInGroup(classLevel);
+        return {
+          classLevel,
+          label: CLASS_LABELS[classLevel] || classLevel,
+          count,
+          capacity: MAX_STUDENTS_PER_GROUP,
+          remaining: Math.max(0, MAX_STUDENTS_PER_GROUP - count),
+          isFull: count >= MAX_STUDENTS_PER_GROUP,
+        };
+      }),
+    );
+
+    return { groups, capacity: MAX_STUDENTS_PER_GROUP };
+  }
+
   async createStudent(userId: number, phone?: string): Promise<Student> {
-    // V√©rifier si l'√©tudiant existe d√©j√† pour ce user
+    // VÈrifier si l'Ètudiant existe dÈj‡ pour ce user
     let student = await this.studentsRepository.findOne({
       where: { user_id: userId },
     });
 
     if (student) {
-      // Mettre √† jour l'√©tudiant existant si besoin
+      // Mettre ‡ jour l'Ètudiant existant si besoin
       student.phone_number = phone ?? student.phone_number;
     } else {
-      // Cr√©er un nouvel √©tudiant
+      // CrÈer un nouvel Ètudiant
       student = this.studentsRepository.create({
         user_id: userId,
         phone_number: phone,
@@ -60,13 +111,13 @@ export class StudentsService {
     // Transform data to match frontend expectations
     const transformedItems = items.map(student => {
       console.log(`Processing student ${student.id} with user:`, student.user);
-      console.log(`üîç Student ${student.id} birth_date:`, student.birth_date);
+      console.log(`?? Student ${student.id} birth_date:`, student.birth_date);
       const birthDateFormatted = student.birth_date ? student.birth_date.toISOString().split('T')[0] : '';
-      console.log(`üîç Student ${student.id} birthDate formatted:`, birthDateFormatted);
+      console.log(`?? Student ${student.id} birthDate formatted:`, birthDateFormatted);
       
       const transformedStudent = {
-        id: student.user?.id || student.id, // Utiliser l'ID de l'utilisateur pour la coh√©rence
-        studentId: student.id, // Garder l'ID de l'√©tudiant pour r√©f√©rence
+        id: student.user?.id || student.id, // Utiliser l'ID de l'utilisateur pour la cohÈrence
+        studentId: student.id, // Garder l'ID de l'Ètudiant pour rÈfÈrence
         firstName: student.user?.firstName || '',
         lastName: student.user?.lastName || '',
         email: student.user?.email || '',
@@ -82,7 +133,7 @@ export class StudentsService {
         notes: '',
       };
       
-      console.log(`üîç Transformed student: ID=${transformedStudent.id}, Name=${transformedStudent.firstName} ${transformedStudent.lastName}, Email=${transformedStudent.email}`);
+      console.log(`?? Transformed student: ID=${transformedStudent.id}, Name=${transformedStudent.firstName} ${transformedStudent.lastName}, Email=${transformedStudent.email}`);
       return transformedStudent;
     });
 
@@ -96,14 +147,19 @@ export class StudentsService {
   }
 
   async create(dto: CreateStudentDto): Promise<Student> {
+    const classLevel = normalizeClassLevel(dto.class_level as string | undefined) as ClassLevel | undefined;
+
     // Check if student already exists for this user
     const existingStudent = await this.studentsRepository.findOne({
       where: { user_id: dto.user_id },
     });
 
     if (existingStudent) {
+      if (classLevel && classLevel !== existingStudent.class_level) {
+        await this.assertGroupHasCapacity(classLevel, existingStudent.id);
+      }
       // Update existing student with new data
-      existingStudent.class_level = dto.class_level ?? existingStudent.class_level;
+      existingStudent.class_level = classLevel ?? existingStudent.class_level;
       existingStudent.birth_date = dto.birth_date ? new Date(dto.birth_date) : existingStudent.birth_date;
       existingStudent.phone_number = dto.phone_number ?? existingStudent.phone_number;
       existingStudent.address = dto.address ?? existingStudent.address;
@@ -111,10 +167,12 @@ export class StudentsService {
       return this.studentsRepository.save(existingStudent);
     }
 
+    await this.assertGroupHasCapacity(classLevel);
+
     // Create new student
     const entity = this.studentsRepository.create({
       user_id: dto.user_id,
-      class_level: dto.class_level,
+      class_level: classLevel,
       birth_date: dto.birth_date ? new Date(dto.birth_date) : undefined,
       phone_number: dto.phone_number,
       address: dto.address,
@@ -125,6 +183,13 @@ export class StudentsService {
 
   async update(id: number, dto: UpdateStudentDto) {
     const payload: any = { ...dto };
+    if (dto.class_level) {
+      payload.class_level = normalizeClassLevel(dto.class_level as string);
+      const existing = await this.findOne(id);
+      if (existing && existing.class_level !== payload.class_level) {
+        await this.assertGroupHasCapacity(payload.class_level, id);
+      }
+    }
     if (dto.birth_date) payload.birth_date = new Date(dto.birth_date as any);
     if (dto.last_activity) payload.last_activity = new Date(dto.last_activity as any);
     await this.studentsRepository.update(id, payload);
@@ -137,7 +202,7 @@ export class StudentsService {
   }
 
   async getParent(studentId: number) {
-    // R√©cup√©rer l'√©tudiant avec ses relations
+    // RÈcupÈrer l'Ètudiant avec ses relations
     const student = await this.studentsRepository.findOne({
       where: { id: studentId },
       relations: ['user']
@@ -147,7 +212,7 @@ export class StudentsService {
       return null;
     }
 
-    // R√©cup√©rer le parent via la relation parent_student
+    // RÈcupÈrer le parent via la relation parent_student
     const parentData = await this.studentsRepository.query(`
       SELECT 
         u.id,

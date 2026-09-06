@@ -198,10 +198,15 @@ export class SimplifiedMessagingService {
         
         // Pour l'admin : toutes les conversations de classes + conversations avec chaque parent
         
-        // 1. Conversations de classes (9 groupes)
+        // 1. Conversations de classes
         const classLevels = [
-          '1ere groupe 1', '1ere groupe 2', '1ere groupe 3', '1ere groupe 4',
-          'Terminale groupe 1', 'Terminale groupe 2', 'Terminale groupe 3', 'Terminale groupe 4', 'Terminale groupe 5'
+          '1ere groupe 1 (Jeudi 18h30-20h30)',
+          '1ere groupe 2 (Vendredi 14h00-16h00)',
+          '1ere groupe 3 (Dimanche 10h00-12h00)',
+          'Terminale groupe 1 (Lundi 18h30-20h30)',
+          'Terminale groupe 2 (Vendredi 16h30-18h30)',
+          'Terminale groupe 3 (Vendredi 18h30-20h30)',
+          'Terminale groupe 4 (Dimanche 08h00-10h00)',
         ];
 
         for (const classLevel of classLevels) {

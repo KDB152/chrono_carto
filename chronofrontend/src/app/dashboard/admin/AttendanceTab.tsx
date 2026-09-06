@@ -17,7 +17,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { AnimatedPage, AnimatedCard, AnimatedButton, AnimatedTable, AnimatedTableRow, AnimatedStats } from '../../../components/ui/animations';
-import { AVAILABLE_CLASSES } from '@/constants/classes';
+import { AVAILABLE_CLASSES, getClassLabel } from '@/constants/classes';
 
 interface Student {
   id: number;
@@ -171,7 +171,7 @@ const AttendanceTab: React.FC = () => {
               >
                 <option value="" className="bg-gray-800 text-white">Toutes les classes</option>
                 {AVAILABLE_CLASSES.map(cls => (
-                  <option key={cls} value={cls} className="bg-gray-800 text-white">{cls}</option>
+                  <option key={cls} value={cls} className="bg-gray-800 text-white">{getClassLabel(cls)}</option>
                 ))}
               </select>
             </div>
@@ -322,7 +322,7 @@ const AttendanceTab: React.FC = () => {
               className="px-4 py-3 border border-white/20 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all bg-white/10 backdrop-blur-md text-white hover:bg-white/20"
             >
               {AVAILABLE_CLASSES.map(cls => (
-                <option key={cls} value={cls} className="bg-gray-800 text-white">{cls}</option>
+                <option key={cls} value={cls} className="bg-gray-800 text-white">{getClassLabel(cls)}</option>
               ))}
             </select>
             <AnimatedButton
@@ -383,7 +383,7 @@ const AttendanceTab: React.FC = () => {
                   <td className="px-6 py-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                       <img src="/images/chrono_carto_logo.png" alt="Chrono-Carto" className="w-3 h-3 mr-1" />
-                      {student.classLevel}
+                      {getClassLabel(student.classLevel)}
                     </span>
                   </td>
                   <td className="px-6 py-4">

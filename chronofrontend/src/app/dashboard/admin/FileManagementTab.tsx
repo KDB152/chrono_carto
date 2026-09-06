@@ -3,7 +3,7 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { getAuthToken, checkAuthAndRedirect } from '../../../utils/auth';
 import { generateDownloadFileName, getDisplayFileType } from '@/lib/fileUtils';
-import { AVAILABLE_CLASSES } from '@/constants/classes';
+import { AVAILABLE_CLASSES, getClassLabel } from '@/constants/classes';
 import { 
   Upload, 
   File, 
@@ -38,7 +38,7 @@ import {
   Home,
   ChevronRight
 } from 'lucide-react';
-import urlapi from '@/config/url';
+
 // Types pour TypeScript - Interface pour les fichiers de la base de données
 interface FileFromDB {
   id: number;
@@ -155,7 +155,7 @@ const FileManagementTabImproved = () => {
   // Fonctions pour la gestion des dossiers
   const loadFolders = async () => {
     try {
-     
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const token = getAuthToken();
       
       if (!token) {
@@ -164,7 +164,7 @@ const FileManagementTabImproved = () => {
       }
 
       // Utiliser la nouvelle API pour les dossiers globaux
-      const endpoint = `${urlapi.backendurlsapi.endpointdossier}`;
+      const endpoint = `${API_BASE}/new-structure/dossiers`;
       
       const response = await fetch(endpoint, {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -216,7 +216,7 @@ const FileManagementTabImproved = () => {
 
   const loadFolderContents = async (folderId: number) => {
     try {
-      
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const token = getAuthToken();
       
       if (!token) {
@@ -225,7 +225,7 @@ const FileManagementTabImproved = () => {
       }
 
       // Récupérer les sous-dossiers du dossier global
-      const sousDossiersResponse = await fetch(`${urlapi.backendurlsapi.endpointdossier}/${folderId}${urlapi.backendurlsapi.sousdossier}`, {
+      const sousDossiersResponse = await fetch(`${API_BASE}/new-structure/dossiers/${folderId}/sous-dossiers`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -260,7 +260,7 @@ const FileManagementTabImproved = () => {
 
   const loadSousDossierFiles = async (sousDossierId: number) => {
     try {
-   
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       const token = getAuthToken();
       
       if (!token) {
@@ -269,7 +269,7 @@ const FileManagementTabImproved = () => {
       }
 
       // Récupérer les fichiers du sous-dossier
-      const fichiersResponse = await fetch(`${urlapi.backendurlsapi.pathfichiers}/${sousDossierId}${urlapi.backendurlsapi.fichiers}`, {
+      const fichiersResponse = await fetch(`${API_BASE}/new-structure/sous-dossiers/${sousDossierId}/fichiers`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -1574,7 +1574,7 @@ const FileManagementTabImproved = () => {
                             }}
                             className="w-4 h-4 text-blue-600 bg-white/10 border-white/20 rounded focus:ring-blue-500 focus:ring-2"
                           />
-                          <span className="text-sm text-white">{cls.replace(/1ère/g, '1ere')}</span>
+                          <span className="text-sm text-white">{getClassLabel(cls)}</span>
                         </label>
                       );
                     })}
@@ -1582,7 +1582,7 @@ const FileManagementTabImproved = () => {
                   {newFolderTargetClasses.length > 0 && (
                     <div className="mt-2">
                       <p className="text-xs text-green-300">
-                        ✓ Classes sélectionnées : {newFolderTargetClasses.map(cls => cls.replace(/1ère/g, '1ere')).join(', ')}
+                        ✓ Classes sélectionnées : {newFolderTargetClasses.map(cls => getClassLabel(cls)).join(', ')}
                       </p>
                     </div>
                   )}
@@ -1800,7 +1800,7 @@ const EditCourseModal: React.FC<EditCourseModalProps> = ({
                     }}
                     className="rounded border-white/20 text-blue-500 focus:ring-blue-400"
                   />
-                  <span className="text-sm text-white">{cls}</span>
+                  <span className="text-sm text-white">{getClassLabel(cls)}</span>
                 </label>
               ))}
             </div>
@@ -1956,7 +1956,7 @@ const EditFolderModal: React.FC<EditFolderModalProps> = ({
                         }}
                         className="w-4 h-4 text-blue-600 bg-white/10 border-white/20 rounded focus:ring-blue-500 focus:ring-2"
                       />
-                      <span className="text-sm text-white">{cls.replace(/1ère/g, '1ere')}</span>
+                      <span className="text-sm text-white">{getClassLabel(cls)}</span>
                     </label>
                   );
                 })}
@@ -1964,7 +1964,7 @@ const EditFolderModal: React.FC<EditFolderModalProps> = ({
               {editedFolder.targetClasses.length > 0 && (
                 <div className="mt-2">
                   <p className="text-xs text-green-300">
-                    ✓ Classes sélectionnées : {editedFolder.targetClasses.map(cls => cls.replace(/1ère/g, '1ere')).join(', ')}
+                    ✓ Classes sélectionnées : {editedFolder.targetClasses.map(cls => getClassLabel(cls)).join(', ')}
                   </p>
                 </div>
               )}

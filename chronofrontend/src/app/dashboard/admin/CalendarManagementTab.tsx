@@ -17,7 +17,7 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
-import { AVAILABLE_CLASSES } from '@/constants/classes';
+import { AVAILABLE_CLASSES, getClassLabel } from '@/constants/classes';
 
 interface StudySession {
   id: number;
@@ -50,8 +50,8 @@ const CalendarManagementTab: React.FC = () => {
   const [notifications, setNotifications] = useState<{type: 'success' | 'error' | 'info', message: string} | null>(null);
   const [editingSession, setEditingSession] = useState<StudySession | null>(null);
 
-  // Formulaire pour nouvelle séance
-  const subjects = ['Histoire', 'Géographie', 'EMC'];
+  // Formulaire pour nouvelle seance
+  const subjects = ['Histoire', 'Geographie', 'EMC'];
   const classes = AVAILABLE_CLASSES;
 
   const [formData, setFormData] = useState({
@@ -64,7 +64,7 @@ const CalendarManagementTab: React.FC = () => {
     targetClass: ''
   });
 
-  // Charger les séances d'étude et les rendez-vous
+  // Charger les seances d'etude et les rendez-vous
   useEffect(() => {
     loadStudySessions();
     loadAppointments();
@@ -74,14 +74,14 @@ const CalendarManagementTab: React.FC = () => {
     try {
       const response = await fetch('/api/study-sessions');
       const data = await response.json();
-      
+
       if (response.ok) {
         setStudySessions(data);
       } else {
-        showNotification('error', 'Erreur lors du chargement des séances');
+        showNotification('error', 'Erreur lors du chargement des seances');
       }
     } catch (error) {
-      showNotification('error', 'Erreur lors du chargement des séances');
+      showNotification('error', 'Erreur lors du chargement des seances');
     }
   };
 
@@ -95,29 +95,29 @@ const CalendarManagementTab: React.FC = () => {
         }
       });
       const data = await response.json();
-      
+
       if (response.ok) {
-        // Filtrer seulement les rendez-vous acceptés
+        // Filtrer seulement les rendez-vous acceptes
         const acceptedAppointments = (data || []).filter((rdv: any) => rdv.status === 'accepted');
-        
-        // Transformer les rendez-vous acceptés pour le calendrier
+
+        // Transformer les rendez-vous acceptes pour le calendrier
         const calendarAppointments = acceptedAppointments.map((rdv: any) => {
-          
+
           // Utiliser appointment_time si disponible, sinon timing
           let appointmentDateTime = rdv.appointment_time || rdv.timing;
-          
+
           let appointmentDate = new Date(appointmentDateTime);
           let dateStr = appointmentDate.toISOString().split('T')[0];
-          
+
           // FORCER L'EXTRACTION DE L'HEURE - SOLUTION DIRECTE
           let appointmentTime = '';
-          
-          
-          // PRIORITÉ 1: appointment_time
+
+
+          // PRIORITE 1: appointment_time
           if (rdv.appointment_time) {
             try {
               const date = new Date(rdv.appointment_time);
-              
+
               if (!isNaN(date.getTime())) {
                 appointmentTime = date.toLocaleString('fr-FR', {
                   day: '2-digit',
@@ -131,8 +131,8 @@ const CalendarManagementTab: React.FC = () => {
             } catch (error) {
             }
           }
-          
-          // PRIORITÉ 2: timing si pas d'heure
+
+          // PRIORITE 2: timing si pas d'heure
           if (!appointmentTime && rdv.timing) {
             try {
               const date = new Date(rdv.timing);
@@ -149,20 +149,20 @@ const CalendarManagementTab: React.FC = () => {
             } catch (error) {
             }
           }
-          
+
           // FORCER une heure si toujours vide
           if (!appointmentTime) {
-            appointmentTime = '08:00'; // Heure forcée
+            appointmentTime = '08:00'; // Heure forcee
           }
 
-          
-          // Utiliser les bons noms de propriétés de l'API
+
+          // Utiliser les bons noms de proprietes de l'API
           const childName = rdv.childName || rdv.child_name || 'Enfant inconnu';
           const parentName = rdv.parentName || rdv.parent_name || 'Parent inconnu';
           const childClass = rdv.childClass || rdv.child_class || 'Classe inconnue';
-          const parentReason = rdv.parentReason || rdv.parent_reason || 'Aucune raison spécifiée';
+          const parentReason = rdv.parentReason || rdv.parent_reason || 'Aucune raison specifiee';
           const adminReason = rdv.adminReason || rdv.admin_reason || '';
-          
+
           const transformedAppointment = {
             id: `appointment-${rdv.id}`,
             title: `Rendez-vous - ${parentName}`,
@@ -192,10 +192,10 @@ const CalendarManagementTab: React.FC = () => {
             appointmentTime: rdv.appointment_time,
             timing: rdv.timing
           };
-          
+
           return transformedAppointment;
         });
-        
+
         setAppointments(calendarAppointments);
       } else {
       }
@@ -225,12 +225,12 @@ const CalendarManagementTab: React.FC = () => {
   };
 
   const getAppointmentTime = (rdv: any) => {
-    
+
     // Utiliser appointmentTime si disponible, sinon utiliser timing
     if (rdv.appointmentTime) {
       // Traiter appointmentTime comme une date locale sans conversion de fuseau horaire
       const appointmentDate = new Date(rdv.appointmentTime);
-      // Utiliser toLocaleString avec timeZone: 'UTC' pour éviter le décalage
+      // Utiliser toLocaleString avec timeZone: 'UTC' pour eviter le decalage
       const formattedTime = appointmentDate.toLocaleString('fr-FR', {
         day: '2-digit',
         month: '2-digit',
@@ -269,17 +269,17 @@ const CalendarManagementTab: React.FC = () => {
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-    
+
     const days = [];
-    
+
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(new Date(year, month, day));
     }
-    
+
     const totalCells = days.length;
     const remainingCells = 7 - (totalCells % 7);
     if (remainingCells < 7) {
@@ -287,7 +287,7 @@ const CalendarManagementTab: React.FC = () => {
         days.push(null);
       }
     }
-    
+
     return days;
   };
 
@@ -310,7 +310,7 @@ const CalendarManagementTab: React.FC = () => {
   const getAllItemsForDate = (date: Date) => {
     const sessions = getSessionsForDate(date);
     const appointments = getAppointmentsForDate(date);
-    
+
     // Convertir les rendez-vous en format compatible
     const appointmentItems = appointments.map(appointment => ({
       id: appointment.id,
@@ -340,20 +340,20 @@ const CalendarManagementTab: React.FC = () => {
 
   const getSessionColor = (subject: string) => {
     switch (subject.toLowerCase()) {
-      case 'mathématiques':
+      case 'mathematiques':
       case 'maths':
         return 'bg-blue-500';
       case 'physique':
         return 'bg-green-500';
       case 'chimie':
         return 'bg-purple-500';
-      case 'français':
+      case 'francais':
         return 'bg-orange-500';
       case 'anglais':
         return 'bg-red-500';
       case 'histoire':
         return 'bg-yellow-500';
-      case 'géographie':
+      case 'geographie':
         return 'bg-indigo-500';
       default:
         return 'bg-gray-500';
@@ -384,7 +384,7 @@ const CalendarManagementTab: React.FC = () => {
   const handleDateClick = (date: Date) => {
     setSelectedDate(date);
     setShowSessionDetails(false);
-    // Pré-remplir la date dans le formulaire
+    // Pre-remplir la date dans le formulaire
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
@@ -435,17 +435,17 @@ const CalendarManagementTab: React.FC = () => {
 
   const handleSubmitSession = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setIsLoading(true);
-      const url = editingSession 
+      const url = editingSession
         ? `/api/study-sessions/${editingSession.id}`
         : '/api/study-sessions';
       const method = editingSession ? 'PATCH' : 'POST';
       const body = {
         ...formData,
-        location: 'Salle de classe', // Valeur par défaut
-        maxStudents: 30 // Valeur par défaut
+        location: 'Salle de classe', // Valeur par defaut
+        maxStudents: 30 // Valeur par defaut
       };
 
       const response = await fetch(url, {
@@ -459,7 +459,7 @@ const CalendarManagementTab: React.FC = () => {
       const data = await response.json();
 
       if (response.ok) {
-        showNotification('success', editingSession ? 'Séance mise à jour avec succès' : 'Séance créée avec succès');
+        showNotification('success', editingSession ? 'Seance mise a jour avec succes' : 'Seance creee avec succes');
         setShowSessionModal(false);
         setFormData({
           title: '',
@@ -482,7 +482,7 @@ const CalendarManagementTab: React.FC = () => {
   };
 
   const handleDeleteSession = async (sessionId: number) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette séance ?')) {
+    if (!window.confirm('Etes-vous sur de vouloir supprimer cette seance ?')) {
       return;
     }
 
@@ -493,7 +493,7 @@ const CalendarManagementTab: React.FC = () => {
       });
 
       if (response.ok) {
-        showNotification('success', 'Séance supprimée avec succès');
+        showNotification('success', 'Seance supprimee avec succes');
         setShowSessionDetails(false);
         loadStudySessions();
       } else {
@@ -509,8 +509,8 @@ const CalendarManagementTab: React.FC = () => {
 
   const days = getDaysInMonth(currentDate);
   const monthNames = [
-    'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-    'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+    'Janvier', 'Fevrier', 'Mars', 'Avril', 'Mai', 'Juin',
+    'Juillet', 'Aout', 'Septembre', 'Octobre', 'Novembre', 'Decembre'
   ];
   const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
 
@@ -525,7 +525,7 @@ const CalendarManagementTab: React.FC = () => {
             className="flex items-center space-x-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
             <Plus className="w-5 h-5" />
-            <span>Nouvelle Séance</span>
+            <span>Nouvelle Seance</span>
           </button>
         </div>
       </div>
@@ -559,7 +559,7 @@ const CalendarManagementTab: React.FC = () => {
             </div>
           ))}
         </div>
-        
+
         {/* Calendar Grid */}
         <div className="grid grid-cols-7 gap-1">
           {days.map((day, index) => {
@@ -570,21 +570,21 @@ const CalendarManagementTab: React.FC = () => {
             const dayItems = getAllItemsForDate(day);
             const isCurrentDay = isToday(day);
             const isSelectedDay = isSelected(day);
-          
+
             return (
               <div
                 key={day.toISOString()}
                 onClick={() => handleDateClick(day)}
                 className={`h-32 p-2 rounded-lg cursor-pointer transition-all duration-200 border ${
-                  isCurrentDay 
-                    ? 'bg-blue-600 text-white border-blue-400 shadow-lg' 
+                  isCurrentDay
+                    ? 'bg-blue-600 text-white border-blue-400 shadow-lg'
                     : isSelectedDay
                     ? 'bg-blue-500/50 text-white border-blue-300'
                     : 'hover:bg-white/10 text-white border-white/20 hover:border-white/40'
                 }`}
               >
                 <div className="relative h-full">
-                  {/* Numéro du jour */}
+                  {/* Numero du jour */}
                   <div className="absolute top-2 left-1/2 transform -translate-x-1/2">
                     <span className={`text-sm font-bold ${
                       isCurrentDay ? 'text-white' : 'text-white'
@@ -592,8 +592,8 @@ const CalendarManagementTab: React.FC = () => {
                       {day.getDate()}
                     </span>
                   </div>
-                    
-                  {/* Compteur de séances */}
+
+                  {/* Compteur de seances */}
                   {dayItems.length > 0 && (
                     <div className="absolute top-1 right-1">
                       <span className="text-xs bg-white/20 rounded-full px-2 py-1 min-w-[20px] text-center">
@@ -601,8 +601,8 @@ const CalendarManagementTab: React.FC = () => {
                       </span>
                     </div>
                   )}
-                    
-                  {/* Zone des événements */}
+
+                  {/* Zone des evenements */}
                   <div className="pt-8 space-y-1 overflow-hidden">
                     {dayItems.slice(0, 2).map((item: any) => (
                       <div
@@ -610,19 +610,19 @@ const CalendarManagementTab: React.FC = () => {
                         onClick={(e) => {
                           e.stopPropagation();
                           if (item.isAppointment) {
-                            // Ouvrir le modal des détails du rendez-vous
+                            // Ouvrir le modal des details du rendez-vous
                             handleEventClick(item);
                           } else {
                             handleSessionClick(item);
                           }
                         }}
                         className={`text-xs p-1 rounded truncate ${
-                          item.isAppointment 
-                            ? 'bg-red-600' 
+                          item.isAppointment
+                            ? 'bg-red-600'
                             : getSessionColor(item.subject)
                         } text-white hover:opacity-80 transition-opacity`}
                       >
-                        {item.isAppointment ? '📅 ' : ''}{item.title}
+                        {item.isAppointment ? 'RDV: ' : ''}{item.title}
                       </div>
                     ))}
                     {dayItems.length > 2 && (
@@ -644,7 +644,7 @@ const CalendarManagementTab: React.FC = () => {
           <div className="bg-white rounded-xl p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-2xl font-bold text-gray-900">
-                {editingSession ? 'Modifier la séance' : 'Nouvelle séance d\'étude'}
+                {editingSession ? 'Modifier la seance' : "Nouvelle seance d'etude"}
               </h3>
               <button
                 onClick={() => setShowSessionModal(false)}
@@ -658,7 +658,7 @@ const CalendarManagementTab: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Titre de la séance *
+                    Titre de la seance *
                   </label>
                   <input
                     type="text"
@@ -671,7 +671,7 @@ const CalendarManagementTab: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Matière *
+                    Matiere *
                   </label>
                   <select
                     value={formData.subject}
@@ -679,7 +679,7 @@ const CalendarManagementTab: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                     required
                   >
-                    <option value="">Sélectionner une matière</option>
+                    <option value="">Selectionner une matiere</option>
                     {subjects.map(subject => (
                       <option key={subject} value={subject}>{subject}</option>
                     ))}
@@ -695,9 +695,9 @@ const CalendarManagementTab: React.FC = () => {
                     onChange={(e) => setFormData(prev => ({ ...prev, targetClass: e.target.value }))}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent"
                   >
-                    <option value="">Sélectionner une classe</option>
+                    <option value="">Selectionner une classe</option>
                     {classes.map(classe => (
-                      <option key={classe} value={classe}>{classe}</option>
+                      <option key={classe} value={classe}>{getClassLabel(classe)}</option>
                     ))}
                   </select>
                 </div>
@@ -731,7 +731,7 @@ const CalendarManagementTab: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Heure de début *
+                    Heure de debut *
                   </label>
                   <input
                     type="time"
@@ -778,7 +778,7 @@ const CalendarManagementTab: React.FC = () => {
                   ) : (
                     <>
                       <Save className="w-4 h-4" />
-                      <span>{editingSession ? 'Modifier' : 'Créer'}</span>
+                      <span>{editingSession ? 'Modifier' : 'Creer'}</span>
                     </>
                   )}
                 </button>
@@ -814,7 +814,7 @@ const CalendarManagementTab: React.FC = () => {
                   </span>
                 )}
               </div>
-                    
+
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <Calendar className="w-4 h-4 text-gray-500" />
@@ -830,7 +830,7 @@ const CalendarManagementTab: React.FC = () => {
                 </div>
               </div>
 
-                    
+
               {selectedSession.description && (
                 <div>
                   <h4 className="text-lg font-semibold text-gray-900 mb-2">Description</h4>
@@ -898,12 +898,12 @@ const CalendarManagementTab: React.FC = () => {
                 )}
                 {(selectedEvent as any).isStudySession && (
                   <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                    📚 Séance d'étude
+                    Seance d'etude
                   </span>
                 )}
                 {(selectedEvent as any).isAppointment && (
                   <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">
-                    📅 Rendez-vous
+                    Rendez-vous
                   </span>
                 )}
               </div>
@@ -912,7 +912,7 @@ const CalendarManagementTab: React.FC = () => {
                 <div className="flex items-center space-x-4">
                   <div className="flex items-center space-x-2">
                     <BookOpen className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-700">Matière: {(selectedEvent as any).subject}</span>
+                    <span className="text-gray-700">Matiere: {(selectedEvent as any).subject}</span>
                   </div>
                 </div>
               )}
@@ -929,7 +929,7 @@ const CalendarManagementTab: React.FC = () => {
                       <span className="text-gray-700">Classe: {(selectedEvent as any).childClass}</span>
                     </div>
                   </div>
-                  
+
                   {(selectedEvent as any).parentReason && (
                     <div>
                       <h4 className="text-lg font-semibold text-gray-900 mb-2">Raison du rendez-vous</h4>
@@ -938,10 +938,10 @@ const CalendarManagementTab: React.FC = () => {
                       </p>
                     </div>
                   )}
-                  
+
                   {(selectedEvent as any).adminReason && (
                     <div>
-                      <h4 className="text-lg font-semibold text-gray-900 mb-2">Réponse de l'administration</h4>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-2">Reponse de l'administration</h4>
                       <p className="text-gray-700 bg-blue-50 p-3 rounded-lg">
                         {(selectedEvent as any).adminReason}
                       </p>

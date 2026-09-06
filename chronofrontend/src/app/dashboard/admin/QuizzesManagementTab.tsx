@@ -40,7 +40,7 @@ import {
   List
 } from 'lucide-react';
 import QuestionManagementModal from './QuestionManagementModal';
-import urlapi from '@/config/url';
+
 interface Question {
   id: string;
   question: string;
@@ -90,7 +90,7 @@ interface QuizResults {
   worstScore: number;
 }
 
-import { AVAILABLE_CLASSES } from '@/constants/classes';
+import { AVAILABLE_CLASSES, getClassLabel } from '@/constants/classes';
 
 // Groupes disponibles pour la sélection
 const AVAILABLE_GROUPS = AVAILABLE_CLASSES;
@@ -171,12 +171,12 @@ const QuizzesManagementTab = () => {
   };
 
   useEffect(() => {
-
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
     const load = async () => {
       setIsLoading(true);
       try {
         // Charger tous les quiz
-        const res = await fetch(`${urlapi.backendurlsapi.quizzes}`);
+        const res = await fetch(`${API_BASE}/quizzes`);
         const json = await res.json();
         const mapped: Quiz[] = (json.items || []).map((q: any) => ({
           id: String(q.id),
@@ -200,7 +200,7 @@ const QuizzesManagementTab = () => {
         setQuizzes(mapped);
 
         // Charger toutes les tentatives
-        const resA = await fetch(`${urlapi.backendurlsapi.attempts}`);
+        const resA = await fetch(`${API_BASE}/quizzes/attempts`);
         const arr = await resA.json();
         const mappedA: QuizAttempt[] = (arr || []).map((a: any) => ({
           id: String(a.id),
@@ -234,8 +234,8 @@ const QuizzesManagementTab = () => {
   const handleDeleteQuiz = async (quiz: Quiz) => {
     setIsLoading(true);
     try {
-      
-      await fetch(`${urlapi.backendurlsapi.quizzes}/${quiz.id}`, { method: 'DELETE' });
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      await fetch(`${API_BASE}/quizzes/${quiz.id}`, { method: 'DELETE' });
       setQuizzes(prev => prev.filter(q => q.id !== quiz.id));
       
       // Mettre à jour quizResults pour l'affichage immédiat
@@ -254,7 +254,8 @@ const QuizzesManagementTab = () => {
   const handleEditQuiz = async (updatedQuiz: Quiz) => {
     setIsLoading(true);
     try {
-      await fetch(`${urlapi.backendurlsapi.quizzes}/${updatedQuiz.id}`, {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      await fetch(`${API_BASE}/quizzes/${updatedQuiz.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -291,8 +292,8 @@ const QuizzesManagementTab = () => {
   const handleCreateQuiz = async (newQuiz: Partial<Quiz>) => {
     setIsLoading(true);
     try {
-
-      const res = await fetch(`${urlapi.backendurlsapi.quizzes}`, {
+      const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const res = await fetch(`${API_BASE}/quizzes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -371,7 +372,7 @@ const QuizzesManagementTab = () => {
       };
 
       // Envoyer la requête au backend
-      const response = await fetch(`${urlapi.backendurlsapi.quizzes}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/quizzes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -421,8 +422,8 @@ const QuizzesManagementTab = () => {
     const load = async () => {
       setIsLoading(true);
       try {
-    
-        const res = await fetch(`${urlapi.backendurlsapi.quizzes}`);
+        const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const res = await fetch(`${API_BASE}/quizzes`);
         const json = await res.json();
         const mapped: Quiz[] = (json.items || []).map((q: any) => ({
           id: String(q.id),
@@ -1082,7 +1083,7 @@ const CreateQuizModal: React.FC<CreateQuizModalProps> = ({ onSave, onClose, isLo
                     }}
                     className="w-5 h-5 text-blue-600 bg-white/10 border-white/20 rounded focus:ring-blue-500 focus:ring-2"
                   />
-                  <span className="text-white">{group}</span>
+                  <span className="text-white">{getClassLabel(group)}</span>
                 </label>
               ))}
             </div>
@@ -1274,7 +1275,7 @@ const EditQuizModal: React.FC<EditQuizModalProps> = ({ quiz, onSave, onClose, is
                     }}
                     className="w-5 h-5 text-blue-600 bg-white/10 border-white/20 rounded focus:ring-blue-500 focus:ring-2"
                   />
-                  <span className="text-white">{group}</span>
+                  <span className="text-white">{getClassLabel(group)}</span>
                 </label>
               ))}
             </div>
