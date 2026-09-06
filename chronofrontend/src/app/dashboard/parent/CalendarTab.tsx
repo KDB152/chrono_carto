@@ -58,15 +58,11 @@ interface CalendarTabProps {
   onChildSelect?: (childId: string) => void;
 }
 
-// --- Helpers ---------------------------------------------------------
+// --- Helpers ---
 
-// Extrait "YYYY-MM-DD" sans jamais passer par un fuseau horaire
-// (evite le bug toISOString() qui peut decaler le jour).
 const extractDateStr = (value: string | Date): string => {
   if (!value) return '';
   if (typeof value === 'string') {
-    // Si c'est deja "YYYY-MM-DD..." on prend juste la partie date brute,
-    // sans reconstruire un objet Date qui appliquerait un fuseau horaire.
     const match = value.match(/^\d{4}-\d{2}-\d{2}/);
     if (match) return match[0];
   }
@@ -86,16 +82,13 @@ const extractTimeStr = (value: string | Date): string => {
   return d.toTimeString().split(' ')[0].substring(0, 5);
 };
 
-// Accepte un tableau brut OU une reponse enveloppee ({items:[...]}, {data:[...]})
 const normalizeArrayResponse = (payload: any): any[] => {
   if (Array.isArray(payload)) return payload;
   if (Array.isArray(payload?.items)) return payload.items;
   if (Array.isArray(payload?.data)) return payload.data;
-  console.warn('[Calendar] Reponse API inattendue (ni tableau ni {items}/{data}):', payload);
+  console.warn('[Calendar] Reponse API inattendue:', payload);
   return [];
 };
-
-// -----------------------------------------------------------------------
 
 const CalendarTab: React.FC<CalendarTabProps> = ({ selectedChild, parent, onChildSelect }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -108,9 +101,6 @@ const CalendarTab: React.FC<CalendarTabProps> = ({ selectedChild, parent, onChil
   const [childEvents, setChildEvents] = useState<Event[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
 
-  // Empeche les appels dupliques/en boucle : on garde la trace de la derniere
-  // combinaison chargee et du controller de la requete en cours, pour pouvoir
-  // l'annuler si un nouveau chargement demarre avant la fin du precedent.
   const lastLoadedKeyRef = useRef<string | null>(null);
   const isLoadingRef = useRef(false);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -120,8 +110,7 @@ const CalendarTab: React.FC<CalendarTabProps> = ({ selectedChild, parent, onChil
     setTimeout(() => setNotifications(null), 5000);
   };
 
-  const loadChildCalendarData = useCallback(async (childId: string, parentId?: string) => {
-    // Annule toute requete precedente encore en vol avant d'en lancer une nouvelle.
+  const loadChildCalendarData = useCallback(async (childId?: string, parentId?: string) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -137,7 +126,7 @@ const CalendarTab: React.FC<CalendarTabProps> = ({ selectedChild, parent, onChil
         'Content-Type': 'application/json'
       };
 
-      // --- Seances d'etude ---
+      // 1. Seances d'etude filtrees pour la classe / groupe du fils
       const studyResponse = await fetch(`${urlapi.backendurlsapi.studysessionsapi}`, {
         headers: authHeaders,
         signal: controller.signal
@@ -146,53 +135,51 @@ const CalendarTab: React.FC<CalendarTabProps> = ({ selectedChild, parent, onChil
       if (!studyResponse.ok) {
         const errBody = await studyResponse.text();
         console.error('[Calendar] Erreur HTTP study-sessions:', studyResponse.status, errBody);
-        showNotification('error', 'Erreur lors du chargement des seances');
       } else {
         const studyPayload = await studyResponse.json();
         const studyData = normalizeArrayResponse(studyPayload);
-        console.log('[Calendar] study-sessions brut recu:', studyData.length, 'seances');
 
         const filteredSessions = studyData.filter((session: any) => {
           if (!session.target_class) return true;
-          const matches = !selectedChild?.class || isSameOrAliasClass(session.target_class, selectedChild.class);
-          if (!matches) {
-            console.log('[Calendar] Seance exclue (classe non matchee):', session.target_class, 'vs', selectedChild?.class);
+          if (selectedChild?.class) {
+            return isSameOrAliasClass(session.target_class, selectedChild.class);
           }
-          return matches;
+          return true;
         });
 
         setStudySessions(filteredSessions);
-        console.log('[Calendar] Seances apres filtrage classe:', filteredSessions.length);
       }
 
-      // --- Rendez-vous ---
-      const appointmentsResponse = await fetch(
-        `${urlapi.backendurlsapi.apirendivous}?parentId=${parentId || ''}`,
-        { headers: authHeaders, signal: controller.signal }
-      );
+      // 2. Rendez-vous du parent acceptes par l'admin
+      const appointmentsUrl = parentId
+        ? `${urlapi.backendurlsapi.apirendivous}?parentId=${parentId}`
+        : `${urlapi.backendurlsapi.apirendivous}`;
+
+      const appointmentsResponse = await fetch(appointmentsUrl, {
+        headers: authHeaders,
+        signal: controller.signal
+      });
 
       if (!appointmentsResponse.ok) {
         const errBody = await appointmentsResponse.text();
         console.error('[Calendar] Erreur HTTP rendez-vous:', appointmentsResponse.status, errBody);
-        showNotification('error', 'Erreur lors du chargement des rendez-vous');
       } else {
         const appointmentsPayload = await appointmentsResponse.json();
         const appointmentsData = normalizeArrayResponse(appointmentsPayload);
-        console.log('[Calendar] rendez-vous bruts recus:', appointmentsData.length);
 
-        const acceptedAppointments = appointmentsData.filter(
-          (rdv: any) => String(rdv.status || '').toLowerCase() === 'accepted'
-        );
-        console.log('[Calendar] rendez-vous acceptes:', acceptedAppointments.length);
+        const acceptedAppointments = appointmentsData.filter((rdv: any) => {
+          const st = String(rdv.status || '').toLowerCase();
+          return st === 'accepted' || st === 'approved';
+        });
 
         const calendarAppointments = acceptedAppointments.map((rdv: any) => {
           const appointmentDateTime = rdv.appointment_time || rdv.timing;
           const dateStr = extractDateStr(appointmentDateTime);
           const appointmentTime = extractTimeStr(appointmentDateTime);
 
-          const childName = rdv.childName || rdv.child_name || 'Enfant inconnu';
-          const parentName = rdv.parentName || rdv.parent_name || 'Parent inconnu';
-          const childClass = rdv.childClass || rdv.child_class || 'Classe inconnue';
+          const childName = rdv.childName || rdv.child_name || (selectedChild ? `${selectedChild.firstName} ${selectedChild.lastName}` : 'Enfant');
+          const parentName = rdv.parentName || rdv.parent_name || 'Parent';
+          const childClass = rdv.childClass || rdv.child_class || selectedChild?.class || '';
           const parentReason = rdv.parentReason || rdv.parent_reason || 'Aucune raison specifiee';
           const adminReason = rdv.adminReason || rdv.admin_reason || '';
 
@@ -226,50 +213,30 @@ const CalendarTab: React.FC<CalendarTabProps> = ({ selectedChild, parent, onChil
         });
 
         setAppointments(calendarAppointments);
-        console.log('[Calendar] rendez-vous transformes pour le calendrier:', calendarAppointments);
       }
 
       setChildEvents([]);
-
-      // On ne marque la cle comme "chargee" qu'apres un succes complet.
-      // Si la requete est annulee ou echoue, la cle reste libre et un
-      // prochain montage/effet pourra reessayer normalement.
-      lastLoadedKeyRef.current = `${childId}:${parentId || ''}`;
+      lastLoadedKeyRef.current = `${childId || 'none'}:${parentId || 'none'}`;
     } catch (error: any) {
-      if (error?.name === 'AbortError') {
-        // Requete annulee volontairement (nouveau chargement ou demontage) :
-        // on ne touche pas lastLoadedKeyRef pour permettre un nouvel essai.
-        return;
-      }
+      if (error?.name === 'AbortError') return;
       console.error('[Calendar] Erreur lors du chargement des donnees du calendrier:', error);
       showNotification('error', 'Erreur lors du chargement du calendrier');
     } finally {
-      // On ne desactive le loader que si cette requete est toujours la requete active
-      // (evite qu'une reponse tardive d'un appel annule ne reactive le state).
       if (abortControllerRef.current === controller) {
         setIsLoading(false);
         isLoadingRef.current = false;
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedChild?.class]);
+  }, [selectedChild?.class, selectedChild?.firstName, selectedChild?.lastName]);
 
-  // Ne relance pas un fetch si un chargement identique est deja EN COURS
-  // (isLoadingRef), mais autorise toujours un nouvel essai si le precedent
-  // a ete annule/a echoue, ou si l'effet se redeclenche normalement.
   useEffect(() => {
-    if (!selectedChild?.id) return;
-
-    const key = `${selectedChild.id}:${parent?.id || ''}`;
+    const key = `${selectedChild?.id || 'none'}:${parent?.id || 'none'}`;
     if (lastLoadedKeyRef.current === key && isLoadingRef.current === false) {
-      // Deja charge avec succes pour cette combinaison et rien n'est en cours : on evite un refetch inutile.
       return;
     }
 
-    loadChildCalendarData(selectedChild.id, parent?.id);
+    loadChildCalendarData(selectedChild?.id, parent?.id);
 
-    // Annule la requete en cours si le composant se demonte ou si l'effet
-    // se redeclenche avant la fin du chargement precedent.
     return () => {
       abortControllerRef.current?.abort();
     };
@@ -469,13 +436,19 @@ const CalendarTab: React.FC<CalendarTabProps> = ({ selectedChild, parent, onChil
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-3xl font-bold text-white">Calendrier</h2>
-            {selectedChild && (
-              <div className="mt-2">
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                  {selectedChild.firstName} {selectedChild.lastName} - Classe: {selectedChild.class}
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              {selectedChild && (
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 shadow">
+                  Enfant: {selectedChild.firstName} {selectedChild.lastName} ({selectedChild.class})
                 </span>
-              </div>
-            )}
+              )}
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-900/60 border border-indigo-400/30 text-indigo-200">
+                Seances d'etude du groupe
+              </span>
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-red-900/60 border border-red-400/30 text-red-200">
+                Rendez-vous acceptes
+              </span>
+            </div>
           </div>
         </div>
       </div>

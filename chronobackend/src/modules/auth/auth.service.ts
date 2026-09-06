@@ -199,13 +199,13 @@ export class AuthService {
           // Cr?er automatiquement un compte ?tudiant virtuel si le parent n'a pas fourni les d?tails de son enfant
           let childCreated = false;
           
-          // Vérifier si le parent a fourni les détails complets de son enfant
-          // childEmail est optionnel, donc on ne le vérifie pas
+          // V?rifier si le parent a fourni les d?tails complets de son enfant
+          // childEmail est optionnel, donc on ne le v?rifie pas
           const hasChildData = registerDto.childFirstName && 
                               registerDto.childLastName && 
                               registerDto.childPhone;
           
-          console.log('Données enfant reçues:', {
+          console.log('Donn?es enfant re?ues:', {
             childFirstName: registerDto.childFirstName,
             childLastName: registerDto.childLastName,
             childEmail: registerDto.childEmail,
@@ -216,7 +216,7 @@ export class AuthService {
           if (hasChildData) {
             // Le parent a fourni les d?tails de son enfant
             try {
-              // Cr?er un nouveau compte enfant avec l'email fourni par le parent ou générer un email virtuel
+              // Cr?er un nouveau compte enfant avec l'email fourni par le parent ou g?n?rer un email virtuel
               // Utiliser le m?me mot de passe que le parent si childPassword n'est pas fourni
               const childPassword = registerDto.childPassword || registerDto.password;
               const childEmail = registerDto.childEmail || `enfant.virtuel.${user.email}`;
@@ -251,7 +251,7 @@ export class AuthService {
               // Ne pas faire ?chouer l'inscription du parent
             }
           } else {
-            console.log('Données enfant incomplètes, création d\'un compte étudiant virtuel');
+            console.log('Donn?es enfant incompl?tes, cr?ation d\'un compte ?tudiant virtuel');
           }
           
           // Si aucun enfant n'a ?t? cr??, cr?er un compte ?tudiant virtuel temporaire
